@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import SiteFooter from "../components/site-footer";
-import SiteHeader from "../components/site-header";
+import GoogleTagManager from "@/components/analytics/google-tag-manager";
+import JsonLd from "@/components/seo/json-ld";
+import SiteFooter from "@/components/site-footer";
+import SiteHeader from "@/components/site-header";
+import { localBusinessJsonLd, siteConfig } from "@/lib/seo";
 import "../styles/globals.css";
 
 const geistSans = Geist({
@@ -15,8 +18,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ratio",
-  description: "Ratio web application",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} Open Graph`,
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +52,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <body className="min-h-screen bg-white text-zinc-900 antialiased">
+        <GoogleTagManager />
+        <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1" role="main">
