@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import {
   contactSchema,
@@ -38,6 +39,7 @@ export default function ContactFormSection() {
 
   const onSubmit = async (values: ContactFormValues) => {
     setStatus(null);
+    trackEvent({ event: "contact_form_submit_attempt" });
 
     try {
       const response = await fetch("/api/contact", {
@@ -53,6 +55,10 @@ export default function ContactFormSection() {
         const message =
           payload?.message ?? "Unable to send your message right now.";
         setStatus({ type: "error", message });
+        trackEvent({
+          event: "contact_form_submit_error",
+          status: response.status,
+        });
         return;
       }
 
@@ -61,13 +67,23 @@ export default function ContactFormSection() {
         type: "success",
         message: payload?.message ?? "Message sent. We will be in touch soon.",
       });
+      trackEvent({ event: "contact_form_submit_success" });
     } catch (error) {
       console.error("Contact form submission failed", error);
       setStatus({
         type: "error",
         message: "Something went wrong. Please try again shortly.",
       });
+      trackEvent({ event: "contact_form_submit_error", status: "network" });
     }
+  };
+
+  const handleFirstInteraction = () => {
+    if (status?.type === "success") {
+      return;
+    }
+
+    trackEvent({ event: "contact_form_start" });
   };
 
   return (
@@ -92,6 +108,7 @@ export default function ContactFormSection() {
               type="text"
               autoComplete="name"
               className={inputClassName}
+              onFocus={handleFirstInteraction}
               {...register("name")}
             />
             {errors.name ? (
@@ -112,6 +129,7 @@ export default function ContactFormSection() {
               type="email"
               autoComplete="email"
               className={inputClassName}
+              onFocus={handleFirstInteraction}
               {...register("email")}
             />
             {errors.email ? (
@@ -132,6 +150,7 @@ export default function ContactFormSection() {
             id="contact-subject"
             type="text"
             className={inputClassName}
+            onFocus={handleFirstInteraction}
             {...register("subject")}
           />
           {errors.subject ? (
@@ -150,6 +169,7 @@ export default function ContactFormSection() {
           <textarea
             id="contact-message"
             className={cn(inputClassName, "min-h-[160px] resize-none")}
+            onFocus={handleFirstInteraction}
             {...register("message")}
           />
           {errors.message ? (

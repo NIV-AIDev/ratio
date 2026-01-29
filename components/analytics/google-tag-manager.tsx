@@ -1,9 +1,10 @@
 import Script from "next/script";
 
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+const isProduction = process.env.NODE_ENV === "production";
 
 export default function GoogleTagManager() {
-  if (!gtmId) {
+  if (!gtmId || !isProduction) {
     return null;
   }
 

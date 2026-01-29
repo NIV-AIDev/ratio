@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Container from "@/components/ui/container";
+import { trackEvent } from "@/lib/analytics";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -31,6 +34,13 @@ export default function Header() {
                 <Link
                   className="transition-colors hover:text-zinc-900"
                   href={link.href}
+                  onClick={() =>
+                    trackEvent({
+                      event: "navigation_click",
+                      label: link.label,
+                      href: link.href,
+                    })
+                  }
                 >
                   {link.label}
                 </Link>
