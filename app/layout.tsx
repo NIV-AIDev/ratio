@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import GoogleTagManager from "@/components/analytics/google-tag-manager";
 import JsonLd from "@/components/seo/json-ld";
-import SiteFooter from "@/components/site-footer";
-import SiteHeader from "@/components/site-header";
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
 import { localBusinessJsonLd, siteConfig } from "@/lib/seo";
 import "../styles/globals.css";
 
@@ -55,11 +55,11 @@ export default function RootLayout({
         <GoogleTagManager />
         <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
         <div className="flex min-h-screen flex-col">
-          <SiteHeader />
+          <Header />
           <main className="flex-1" role="main">
             {children}
           </main>
-          <SiteFooter />
+          <Footer />
         </div>
       </body>
     </html>

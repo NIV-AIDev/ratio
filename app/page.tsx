@@ -1,6 +1,13 @@
-import PageSections from "@/components/sections/page-sections";
-import { homeContent } from "@/lib/content";
+import Hero from "@/components/sections/hero";
+import ProjectsGallery from "@/components/sections/projects-gallery";
+import ServicesGrid from "@/components/sections/services-grid";
 
 export default function Home() {
-  return <PageSections content={homeContent} />;
+  return (
+    <>
+      <Hero />
+      <ServicesGrid />
+      <ProjectsGallery />
+    </>
+  );
 }
