@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import JsonLd from "@/components/seo/json-ld";
+import ContactFormSection from "@/components/sections/contact-form";
 import PageSections from "@/components/sections/page-sections";
 import { fetchPageMetadata } from "@/lib/cms";
 import { contactContent } from "@/lib/content";
@@ -52,6 +53,7 @@ export default async function ContactPage() {
         <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
       ) : null}
       <PageSections content={contactContent} />
+      <ContactFormSection />
     </>
   );
 }
