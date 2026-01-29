@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import GoogleTagManager from "@/components/analytics/google-tag-manager";
-import JsonLd from "@/components/seo/json-ld";
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
-import { localBusinessJsonLd, siteConfig } from "@/lib/seo";
+import { siteConfig } from "@/lib/seo";
 import "../styles/globals.css";
 
 const geistSans = Geist({
@@ -53,7 +52,6 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-white text-zinc-900 antialiased">
         <GoogleTagManager />
-        <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
         <div className="flex min-h-screen flex-col">
           <Header />
           <main className="flex-1" role="main">

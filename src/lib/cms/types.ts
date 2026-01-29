@@ -17,6 +17,15 @@ export type Project = {
   body?: unknown[];
 };
 
+export type PageMetadata = {
+  _id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  ogImageUrl?: string;
+  includeLocalBusinessJsonLd?: boolean;
+};
+
 export type Testimonial = {
   _id: string;
   quote: string;
