@@ -1,0 +1,22 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- TODO: Replace with licensed construction hero photography (Unsplash/Pexels/Pixabay). -->
+  <defs>
+    <linearGradient id="bg-hero-02" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#151311" />
+      <stop offset="45%" stop-color="#26201B" />
+      <stop offset="100%" stop-color="#4B3D31" />
+    </linearGradient>
+    <linearGradient id="accent-hero-02" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D6B08A" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#B6814B" stop-opacity="0.65" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg-hero-02)" />
+  <path d="M180 820C300 710 420 610 600 560C760 516 940 540 1140 460C1280 404 1380 320 1500 170" stroke="#F6F3EF" stroke-opacity="0.22" stroke-width="6" stroke-linecap="round" />
+  <rect x="170" y="170" width="730" height="26" rx="13" fill="#F6F3EF" fill-opacity="0.42" />
+  <rect x="170" y="226" width="900" height="16" rx="8" fill="#F6F3EF" fill-opacity="0.3" />
+  <rect x="170" y="264" width="760" height="16" rx="8" fill="#F6F3EF" fill-opacity="0.27" />
+  <rect x="980" y="120" width="430" height="760" rx="32" fill="url(#accent-hero-02)" fill-opacity="0.28" />
+  <circle cx="1160" cy="730" r="200" fill="url(#accent-hero-02)" fill-opacity="0.3" />
+  <text x="170" y="920" fill="#F6F3EF" fill-opacity="0.52" font-size="20" font-family="Arial, sans-serif" letter-spacing="4">CONSTRUCTION HERO PLACEHOLDER 02</text>
+</svg>

@@ -1,0 +1,36 @@
+<!-- Generated to visually represent: "Technical Package" -->
+<svg width="1400" height="980" viewBox="0 0 1400 980" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Technical package abstract architectural graphic" color="#FFF8EE">
+  <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="104" y="84" width="1192" height="812" rx="26"/>
+    <rect x="170" y="146" width="1060" height="688" rx="20"/>
+
+    <rect x="222" y="194" width="956" height="592" rx="14"/>
+
+    <path d="M342 194V786"/>
+    <path d="M462 194V786"/>
+    <path d="M582 194V786"/>
+    <path d="M702 194V786"/>
+    <path d="M822 194V786"/>
+    <path d="M942 194V786"/>
+    <path d="M1062 194V786"/>
+
+    <path d="M222 292H1178"/>
+    <path d="M222 390H1178"/>
+    <path d="M222 488H1178"/>
+    <path d="M222 586H1178"/>
+    <path d="M222 684H1178"/>
+
+    <circle cx="462" cy="390" r="14"/>
+    <circle cx="702" cy="488" r="14"/>
+    <circle cx="942" cy="586" r="14"/>
+    <circle cx="822" cy="292" r="14"/>
+
+    <path d="M462 390L702 488L942 586"/>
+    <path d="M822 292L702 488"/>
+
+    <rect x="252" y="816" width="896" height="52" rx="10"/>
+    <path d="M330 842H478"/>
+    <path d="M626 842H774"/>
+    <path d="M922 842H1070"/>
+  </g>
+</svg>

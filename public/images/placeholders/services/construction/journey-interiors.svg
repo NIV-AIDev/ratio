@@ -1,0 +1,16 @@
+<svg width="960" height="640" viewBox="0 0 960 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- TODO: Replace with licensed journey card photography (Unsplash/Pexels/Pixabay). -->
+  <defs>
+    <linearGradient id="bg-journey-int" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#171411" />
+      <stop offset="100%" stop-color="#3B3027" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="640" fill="url(#bg-journey-int)" />
+  <rect x="84" y="96" width="470" height="16" rx="8" fill="#F6F3EF" fill-opacity="0.35" />
+  <rect x="84" y="132" width="520" height="24" rx="12" fill="#F6F3EF" fill-opacity="0.48" />
+  <rect x="84" y="182" width="390" height="14" rx="7" fill="#F6F3EF" fill-opacity="0.3" />
+  <rect x="620" y="96" width="240" height="420" rx="24" fill="#B6814B" fill-opacity="0.25" />
+  <circle cx="690" cy="520" r="96" fill="#D6B08A" fill-opacity="0.26" />
+  <text x="84" y="586" fill="#F6F3EF" fill-opacity="0.55" font-size="16" font-family="Arial, sans-serif" letter-spacing="3">JOURNEY PLACEHOLDER - INTERIOR DESIGN</text>
+</svg>

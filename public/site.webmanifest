@@ -1,0 +1,34 @@
+{
+	"name": "The Ratio",
+	"short_name": "Ratio",
+	"icons": [
+		{
+			"src": "/favicon-32x32.png",
+			"sizes": "32x32",
+			"type": "image/png"
+		},
+		{
+			"src": "/favicon-16x16.png",
+			"sizes": "16x16",
+			"type": "image/png"
+		}
+	],
+	"theme_color": "#f6f3ef",
+	"background_color": "#f6f3ef",
+	"display": "standalone",
+	"Resources": {
+		"DBInstance": {
+			"Type": "AWS::DocDB::DBInstance",
+			"Properties": {
+				"DBInstanceClass": "<String>",
+				"DBClusterIdentifier": "<String>"
+			}
+		},
+		"WarmPool": {
+			"Type": "AWS::AutoScaling::WarmPool",
+			"Properties": {
+				"AutoScalingGroupName": "<String>"
+			}
+		}
+	}
+}

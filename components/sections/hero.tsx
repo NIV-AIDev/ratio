@@ -9,7 +9,7 @@ export default function Hero() {
       <Container className="flex flex-col gap-10">
         <div className="flex flex-col gap-6">
           <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">
-            Ratio Interiors
+            The Ratio
           </p>
           <h1 className="text-4xl font-semibold uppercase tracking-[0.2em] text-zinc-900 sm:text-5xl">
             Hero headline placeholder

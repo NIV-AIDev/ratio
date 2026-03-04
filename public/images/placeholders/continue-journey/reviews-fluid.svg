@@ -1,0 +1,75 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Fluid abstract visual for reviews card</title>
+  <desc id="desc">Warm metallic and cool mist gradients with layered flowing shapes to represent client feedback and trust.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1470" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#241B14" />
+      <stop offset="0.52" stop-color="#2E251D" />
+      <stop offset="1" stop-color="#171310" />
+    </linearGradient>
+
+    <radialGradient id="goldGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(390 260) rotate(18) scale(620 480)">
+      <stop stop-color="#E2BD8B" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#E2BD8B" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="mistGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1210 780) rotate(-18) scale(660 520)">
+      <stop stop-color="#98B8CC" stop-opacity="0.6" />
+      <stop offset="1" stop-color="#98B8CC" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="flowA" x1="250" y1="140" x2="1360" y2="790" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F0D7B2" stop-opacity="0.76" />
+      <stop offset="0.47" stop-color="#CDA176" stop-opacity="0.46" />
+      <stop offset="1" stop-color="#A67E5A" stop-opacity="0.12" />
+    </linearGradient>
+
+    <linearGradient id="flowB" x1="1320" y1="210" x2="220" y2="890" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D7E4EC" stop-opacity="0.62" />
+      <stop offset="0.55" stop-color="#AFC6D4" stop-opacity="0.34" />
+      <stop offset="1" stop-color="#8DA7B7" stop-opacity="0.08" />
+    </linearGradient>
+
+    <filter id="softBlur" x="-200" y="-200" width="2000" height="1400" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="56" />
+    </filter>
+
+    <filter id="lineGlow" x="90" y="80" width="1420" height="860" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.8" />
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)" />
+  <rect width="1600" height="1000" fill="url(#goldGlow)" />
+  <rect width="1600" height="1000" fill="url(#mistGlow)" />
+
+  <g filter="url(#softBlur)">
+    <ellipse cx="380" cy="180" rx="260" ry="180" fill="#F0D2A8" fill-opacity="0.32">
+      <animate attributeName="cx" values="380;430;380" dur="14s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="180;150;180" dur="14s" repeatCount="indefinite" />
+    </ellipse>
+    <ellipse cx="1230" cy="790" rx="300" ry="220" fill="#9CB9CA" fill-opacity="0.26">
+      <animate attributeName="cx" values="1230;1185;1230" dur="16s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="790;815;790" dur="16s" repeatCount="indefinite" />
+    </ellipse>
+  </g>
+
+  <path d="M96 556C252 464 366 426 544 462C752 504 865 644 1086 676C1248 700 1417 646 1502 585V1000H96V556Z" fill="url(#flowA)">
+    <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M96 556C252 464 366 426 544 462C752 504 865 644 1086 676C1248 700 1417 646 1502 585V1000H96V556Z;M96 572C278 454 382 416 563 448C765 484 904 640 1118 680C1283 711 1410 675 1502 606V1000H96V572Z;M96 556C252 464 366 426 544 462C752 504 865 644 1086 676C1248 700 1417 646 1502 585V1000H96V556Z" />
+  </path>
+
+  <path d="M158 474C319 351 522 316 701 367C896 423 1011 547 1221 565C1338 576 1435 553 1502 515V1000H158V474Z" fill="url(#flowB)">
+    <animate attributeName="d" dur="20s" repeatCount="indefinite" values="M158 474C319 351 522 316 701 367C896 423 1011 547 1221 565C1338 576 1435 553 1502 515V1000H158V474Z;M158 490C334 336 513 307 726 362C915 410 1048 534 1236 559C1368 577 1450 566 1502 533V1000H158V490Z;M158 474C319 351 522 316 701 367C896 423 1011 547 1221 565C1338 576 1435 553 1502 515V1000H158V474Z" />
+  </path>
+
+  <g filter="url(#lineGlow)" stroke-linecap="round">
+    <path d="M142 606C324 552 491 564 642 636C785 705 951 722 1165 668C1277 640 1374 601 1458 544" stroke="#F4E7D3" stroke-opacity="0.62" stroke-width="2.2" />
+    <path d="M180 684C353 640 507 667 668 741C826 815 1002 823 1204 775C1308 750 1398 713 1470 666" stroke="#D7E3EB" stroke-opacity="0.52" stroke-width="2" />
+  </g>
+
+  <g fill="#F0D9B8" fill-opacity="0.88">
+    <path d="M1324 250L1338 281L1370 284L1346 306L1352 337L1324 321L1296 337L1302 306L1278 284L1310 281L1324 250Z" />
+    <path d="M1415 318L1424 339L1446 341L1429 357L1434 379L1415 367L1396 379L1401 357L1384 341L1406 339L1415 318Z" fill-opacity="0.72" />
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="960" viewBox="0 0 1280 960" role="img" aria-labelledby="title desc">
+  <title id="title">Lobby design placeholder</title>
+  <desc id="desc">Abstract placeholder for lobby design image.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#cab497" />
+      <stop offset="100%" stop-color="#8d7558" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="960" fill="url(#bg)" />
+  <rect x="150" y="160" width="980" height="640" fill="#f8f1e5" fill-opacity="0.25" rx="24" />
+  <path d="M220 730 C 440 590, 860 590, 1060 730" fill="none" stroke="#f8f1e5" stroke-opacity="0.4" stroke-width="4" />
+</svg>

@@ -1,0 +1,19 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#F5EFE7"/>
+  <g transform="translate(250 90)">
+    <rect x="0" y="0" width="700" height="700" fill="white" stroke="#66C33A" stroke-width="18"/>
+
+    <g transform="translate(70 72)">
+      <path d="M0 0H36V24H60V60H36V36H0V0Z" fill="#66C33A"/>
+      <text x="78" y="50" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="700">houzz</text>
+    </g>
+
+    <g transform="translate(170 236)">
+      <rect x="0" y="144" width="112" height="170" rx="18" fill="#66C33A"/>
+      <circle cx="42" cy="232" r="14" fill="#B9E38E"/>
+      <path d="M108 290C130 306 162 318 204 318H270C335 318 380 270 380 212C380 166 352 130 306 114C310 98 315 82 322 66C332 42 326 18 308 6C290 -6 263 0 248 22L214 72C187 111 154 142 114 159L108 290Z" fill="#F4BA2B"/>
+    </g>
+
+    <text x="350" y="656" text-anchor="middle" fill="#4A4A4A" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" letter-spacing="10">2024</text>
+  </g>
+</svg>

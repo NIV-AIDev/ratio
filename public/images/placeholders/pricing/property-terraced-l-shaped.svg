@@ -1,0 +1,11 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#EEE5D7" />
+  <path d="M140 420H780V680H140V420Z" fill="#D8BF9B" />
+  <path d="M780 500H1060V680H780V500Z" fill="#CFB188" />
+  <rect x="140" y="360" width="640" height="70" fill="#A88352" />
+  <rect x="780" y="440" width="280" height="60" fill="#9B7646" />
+  <rect x="240" y="510" width="120" height="130" rx="8" fill="#F9F4EC" />
+  <rect x="420" y="510" width="120" height="130" rx="8" fill="#F9F4EC" />
+  <rect x="860" y="560" width="120" height="100" rx="8" fill="#F3EADF" />
+  <text x="600" y="760" text-anchor="middle" fill="#6C5941" font-size="44" font-family="serif">Terraced L-shaped placeholder</text>
+</svg>

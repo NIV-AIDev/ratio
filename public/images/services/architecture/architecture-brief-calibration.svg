@@ -1,0 +1,35 @@
+<!-- Generated to visually represent: "Brief Calibration" -->
+<svg width="1400" height="980" viewBox="0 0 1400 980" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Brief calibration abstract architectural graphic" color="#FFF8EE">
+  <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="104" y="84" width="1192" height="812" rx="26"/>
+    <rect x="170" y="146" width="1060" height="688" rx="20"/>
+
+    <circle cx="316" cy="232" r="56"/>
+    <circle cx="700" cy="232" r="56"/>
+    <circle cx="1084" cy="232" r="56"/>
+
+    <path d="M316 288V356"/>
+    <path d="M700 288V356"/>
+    <path d="M1084 288V356"/>
+
+    <rect x="250" y="356" width="900" height="56" rx="12"/>
+    <rect x="376" y="372" width="214" height="24" rx="10"/>
+    <rect x="594" y="372" width="214" height="24" rx="10"/>
+    <rect x="812" y="372" width="214" height="24" rx="10"/>
+
+    <path d="M484 396V462"/>
+    <path d="M700 396V462"/>
+    <path d="M916 396V462"/>
+
+    <rect x="478" y="462" width="444" height="232" rx="16"/>
+    <rect x="556" y="520" width="288" height="116" rx="12"/>
+
+    <path d="M308 742H1092"/>
+    <path d="M356 786H1044"/>
+    <path d="M404 830H996"/>
+
+    <path d="M700 694V856"/>
+    <circle cx="700" cy="748" r="12"/>
+    <circle cx="700" cy="802" r="12"/>
+  </g>
+</svg>

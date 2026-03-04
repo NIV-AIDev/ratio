@@ -1,0 +1,22 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture hero placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A1713"/>
+      <stop offset="0.55" stop-color="#2A241D"/>
+      <stop offset="1" stop-color="#3A3025"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="1410" y1="120" x2="1410" y2="840" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B6814B" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#B6814B" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect x="1040" y="140" width="740" height="800" rx="28" fill="url(#glow)"/>
+  <rect x="120" y="120" width="730" height="840" rx="26" fill="#15120F" stroke="#5D4A34" stroke-opacity="0.72"/>
+  <rect x="170" y="180" width="630" height="360" rx="14" fill="#2D261F"/>
+  <rect x="170" y="580" width="470" height="12" rx="6" fill="#B6814B" fill-opacity="0.8"/>
+  <rect x="170" y="620" width="560" height="10" rx="5" fill="#D7C2A5" fill-opacity="0.42"/>
+  <rect x="170" y="656" width="520" height="10" rx="5" fill="#D7C2A5" fill-opacity="0.32"/>
+  <rect x="170" y="692" width="440" height="10" rx="5" fill="#D7C2A5" fill-opacity="0.32"/>
+  <text x="170" y="792" fill="#E8DDCF" fill-opacity="0.88" font-family="Georgia, serif" font-size="48" letter-spacing="4">ARCHITECTURE</text>
+</svg>

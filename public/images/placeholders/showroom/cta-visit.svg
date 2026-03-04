@@ -1,0 +1,14 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Showroom call-to-action placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15100C" />
+      <stop offset="1" stop-color="#36281E" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)" />
+  <rect x="190" y="140" width="1540" height="800" rx="36" fill="#1B1511" stroke="#7A5F45" stroke-opacity="0.5" />
+  <path d="M260 760C500 540 740 540 980 760C1220 980 1460 980 1660 760" stroke="#B6814B" stroke-opacity="0.35" stroke-width="22" stroke-linecap="round" />
+  <circle cx="680" cy="420" r="140" fill="#B6814B" fill-opacity="0.16" />
+  <circle cx="1240" cy="470" r="200" fill="#D1B48D" fill-opacity="0.12" />
+  <text x="260" y="990" fill="#D3BF9D" fill-opacity="0.72" font-family="serif" font-size="38" letter-spacing="6">SHOWROOM CTA PLACEHOLDER</text>
+</svg>

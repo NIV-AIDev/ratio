@@ -1,59 +1,28 @@
 import type { Metadata } from "next";
+import ContactPageContent from "@/components/contact/ContactPageContent";
 import JsonLd from "@/components/seo/json-ld";
-import ContactFormSection from "@/components/sections/contact-form";
-import PageSections from "@/components/sections/page-sections";
-import { fetchPageMetadata } from "@/lib/cms";
-import { contactContent } from "@/lib/content";
-import { buildLocalBusinessJsonLd, buildPageMetadata } from "@/lib/seo";
+import { buildLocalBusinessJsonLd, buildPageMetadata, siteConfig } from "@/lib/seo";
 
-export const revalidate = 300;
+const pageTitle = "Contact";
+const pageDescription =
+  "Start your project conversation with The Ratio — share your scope and our team will respond with next steps.";
 
-const pageSlug = "contact";
-const pagePath = "/contact";
+export const metadata: Metadata = buildPageMetadata({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/contact",
+});
 
-export async function generateMetadata(): Promise<Metadata> {
-  let pageMetadata = null;
-
-  try {
-    pageMetadata = await fetchPageMetadata(pageSlug);
-  } catch (error) {
-    console.error("Failed to load contact metadata", error);
-  }
-
-  const fallbackTitle = contactContent.intro.title;
-  const title = pageMetadata?.title ?? fallbackTitle;
-
-  return buildPageMetadata({
-    title,
-    description: pageMetadata?.description ?? contactContent.intro.description,
-    ogImageUrl: pageMetadata?.ogImageUrl,
-    path: pagePath,
+export default function ContactPage() {
+  const localBusinessJsonLd = buildLocalBusinessJsonLd({
+    name: siteConfig.name,
+    description: pageDescription,
   });
-}
-
-export default async function ContactPage() {
-  let pageMetadata = null;
-
-  try {
-    pageMetadata = await fetchPageMetadata(pageSlug);
-  } catch (error) {
-    console.error("Failed to load contact metadata", error);
-  }
-
-  const localBusinessJsonLd = pageMetadata?.includeLocalBusinessJsonLd
-    ? buildLocalBusinessJsonLd({
-        description:
-          pageMetadata?.description ?? contactContent.intro.description ?? undefined,
-      })
-    : null;
 
   return (
     <>
-      {localBusinessJsonLd ? (
-        <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
-      ) : null}
-      <PageSections content={contactContent} />
-      <ContactFormSection />
+      <JsonLd data={localBusinessJsonLd} id="json-ld-local-business" />
+      <ContactPageContent />
     </>
   );
 }

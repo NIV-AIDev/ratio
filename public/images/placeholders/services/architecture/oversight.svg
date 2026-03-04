@@ -1,0 +1,12 @@
+<svg width="1400" height="980" viewBox="0 0 1400 980" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Site support and delivery oversight placeholder">
+  <rect width="1400" height="980" fill="#14110E"/>
+  <rect x="96" y="88" width="1208" height="804" rx="28" fill="#221C16" stroke="#55422E" stroke-opacity="0.82"/>
+  <rect x="176" y="176" width="420" height="620" rx="18" fill="#2D241B"/>
+  <rect x="640" y="176" width="584" height="220" rx="18" fill="#33291F"/>
+  <rect x="640" y="424" width="584" height="372" rx="18" fill="#3B2F23"/>
+  <rect x="690" y="236" width="430" height="12" rx="6" fill="#B6814B"/>
+  <rect x="690" y="272" width="380" height="10" rx="5" fill="#E3D4BF" fill-opacity="0.4"/>
+  <rect x="690" y="306" width="350" height="10" rx="5" fill="#E3D4BF" fill-opacity="0.35"/>
+  <text x="690" y="560" fill="#EEE3D4" fill-opacity="0.9" font-family="Georgia, serif" font-size="44" letter-spacing="3">DELIVERY</text>
+  <text x="690" y="618" fill="#EEE3D4" fill-opacity="0.9" font-family="Georgia, serif" font-size="44" letter-spacing="3">OVERSIGHT</text>
+</svg>

@@ -1,0 +1,28 @@
+<!-- Generated to visually represent: "Options & Direction" -->
+<svg width="1400" height="980" viewBox="0 0 1400 980" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Options and direction abstract architectural graphic" color="#FFF8EE">
+  <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="104" y="84" width="1192" height="812" rx="26"/>
+    <rect x="170" y="146" width="1060" height="688" rx="20"/>
+
+    <rect x="238" y="222" width="188" height="92" rx="12"/>
+    <rect x="238" y="444" width="188" height="92" rx="12"/>
+    <rect x="238" y="666" width="188" height="92" rx="12"/>
+
+    <path d="M426 268C558 268 592 344 712 424"/>
+    <path d="M426 490C558 490 592 490 712 490"/>
+    <path d="M426 712C558 712 592 636 712 556"/>
+
+    <circle cx="768" cy="490" r="96"/>
+    <circle cx="768" cy="490" r="42"/>
+
+    <path d="M864 490H1138"/>
+    <path d="M1060 418L1138 490L1060 562"/>
+
+    <circle cx="954" cy="336" r="12"/>
+    <circle cx="1022" cy="336" r="12"/>
+    <circle cx="1090" cy="336" r="12"/>
+
+    <path d="M930 664H1114"/>
+    <path d="M930 706H1114"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg width="1920" height="1200" viewBox="0 0 1920 1200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Showroom hero placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#201811" />
+      <stop offset="0.55" stop-color="#3E2E23" />
+      <stop offset="1" stop-color="#0F0D0B" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 360) rotate(126) scale(620 460)">
+      <stop stop-color="#D6B485" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#D6B485" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1200" fill="url(#bg)" />
+  <rect x="120" y="170" width="1040" height="760" rx="28" fill="#1B1511" stroke="#5E4A39" stroke-opacity="0.65" />
+  <rect x="1280" y="210" width="510" height="640" rx="28" fill="#16110D" stroke="#6A5441" stroke-opacity="0.5" />
+  <rect x="220" y="265" width="840" height="560" rx="16" fill="#2A2018" />
+  <rect x="1360" y="305" width="350" height="190" rx="12" fill="#302419" />
+  <rect x="1360" y="535" width="350" height="190" rx="12" fill="#261D15" />
+  <ellipse cx="1180" cy="360" rx="620" ry="460" fill="url(#glow)" />
+  <text x="220" y="1020" fill="#D6C3A6" fill-opacity="0.72" font-family="serif" font-size="42" letter-spacing="8">SHOWROOM HERO PLACEHOLDER</text>
+  <text x="220" y="1080" fill="#C3B39A" fill-opacity="0.62" font-family="sans-serif" font-size="26" letter-spacing="3">TODO: replace with licensed Unsplash/Pexels/Pixabay or commissioned imagery.</text>
+</svg>

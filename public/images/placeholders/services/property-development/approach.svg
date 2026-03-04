@@ -1,0 +1,17 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Approach placeholder image">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8DFD4"/>
+      <stop offset="100%" stop-color="#CDB28D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <g opacity="0.7" stroke="#745A3F" stroke-width="3">
+    <line x1="100" y1="120" x2="1100" y2="120"/>
+    <line x1="100" y1="260" x2="1100" y2="260"/>
+    <line x1="100" y1="400" x2="1100" y2="400"/>
+    <line x1="100" y1="540" x2="1100" y2="540"/>
+    <line x1="100" y1="680" x2="1100" y2="680"/>
+  </g>
+  <text x="100" y="810" fill="#4B3825" font-family="Georgia, serif" font-size="34" letter-spacing="3">TODO: REPLACE WITH APPROACH PHOTOGRAPHY (UNSPLASH / PEXELS / PIXABAY)</text>
+</svg>

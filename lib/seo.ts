@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const FALLBACK_SITE_URL = "http://localhost:3000";
+
+const resolveSiteUrl = (value?: string) => {
+  const candidate = value?.trim();
+
+  if (!candidate) {
+    return FALLBACK_SITE_URL;
+  }
+
+  try {
+    return new URL(candidate).toString().replace(/\/$/, "");
+  } catch {
+    return FALLBACK_SITE_URL;
+  }
+};
+
+const siteUrl = resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 
 export const siteConfig = {
-  name: "Ratio",
-  description: "Architecture-led digital practice.",
+  name: "The Ratio",
+  description: "Luxury interior design studio and property developer.",
   url: siteUrl,
-  ogImage: new URL("/og-image.jpg", siteUrl).toString(),
+  ogImage: new URL("/og-image.png", siteUrl).toString(),
 };
 
 export const localBusinessJsonLd = {

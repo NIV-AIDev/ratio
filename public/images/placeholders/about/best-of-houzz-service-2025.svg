@@ -1,0 +1,10 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#F5EFE7"/>
+  <g transform="translate(120 120)">
+    <path d="M0 0H820L960 44V660H0V0Z" fill="#F4BA2B"/>
+    <text x="70" y="98" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="700">h</text>
+    <text x="70" y="310" fill="#0D0D0D" font-family="Arial, Helvetica, sans-serif" font-size="154" font-weight="700">2025</text>
+    <text x="70" y="430" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">Best of Houzz</text>
+    <text x="70" y="520" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">Service</text>
+  </g>
+</svg>

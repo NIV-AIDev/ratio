@@ -1,0 +1,8 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#EFE8DE" />
+  <rect x="120" y="420" width="960" height="260" rx="16" fill="#DCCAB0" />
+  <polygon points="120,430 600,230 1080,430" fill="#B8996A" />
+  <rect x="350" y="510" width="160" height="170" rx="8" fill="#AE9268" />
+  <rect x="585" y="490" width="260" height="130" rx="10" fill="#F7F3EC" />
+  <text x="600" y="760" text-anchor="middle" fill="#6C5941" font-size="44" font-family="serif">Detached placeholder</text>
+</svg>

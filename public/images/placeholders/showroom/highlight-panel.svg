@@ -1,0 +1,14 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Showroom highlight placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16110D" />
+      <stop offset="1" stop-color="#3B2B1E" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)" />
+  <rect x="120" y="140" width="440" height="620" rx="18" fill="#2E2319" stroke="#8A6C4D" stroke-opacity="0.5" />
+  <rect x="610" y="170" width="470" height="160" rx="14" fill="#423122" />
+  <rect x="610" y="360" width="470" height="160" rx="14" fill="#3B2C1F" />
+  <rect x="610" y="550" width="470" height="160" rx="14" fill="#35281D" />
+  <text x="120" y="830" fill="#D1B48D" fill-opacity="0.7" font-family="sans-serif" font-size="24" letter-spacing="2">SHOWROOM HIGHLIGHT PLACEHOLDER</text>
+</svg>
