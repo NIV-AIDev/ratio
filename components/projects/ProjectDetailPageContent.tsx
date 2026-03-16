@@ -480,24 +480,40 @@ export default function ProjectDetailPageContent({
               style={{ width: `${100 / heroCount}%` }}
             >
               {/* TODO: replace placeholder with final project imagery. */}
-              <Image
-                src={resolveProjectImageSrc(slide)}
-                alt={slide.alt}
-                fill
-                priority={index === 0}
-                quality={90}
-                className={
-                  isStElmoProject
-                    ? "object-contain object-center brightness-[1.05]"
-                    : "object-cover object-center brightness-[1.05] md:object-contain"
-                }
-                style={
-                  isStElmoProject
-                    ? { objectFit: "contain", objectPosition: "center" }
-                    : undefined
-                }
-                sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
-              />
+              {isStElmoProject ? (
+                <>
+                  <Image
+                    src={resolveProjectImageSrc(slide)}
+                    alt=""
+                    fill
+                    aria-hidden
+                    quality={90}
+                    className="pointer-events-none object-cover object-center opacity-60"
+                    style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                    sizes={stElmoResponsiveSizes}
+                  />
+                  <Image
+                    src={resolveProjectImageSrc(slide)}
+                    alt={slide.alt}
+                    fill
+                    priority={index === 0}
+                    quality={90}
+                    className="object-contain object-center brightness-[1.05]"
+                    style={{ objectFit: "contain", objectPosition: "center" }}
+                    sizes={stElmoResponsiveSizes}
+                  />
+                </>
+              ) : (
+                <Image
+                  src={resolveProjectImageSrc(slide)}
+                  alt={slide.alt}
+                  fill
+                  priority={index === 0}
+                  quality={90}
+                  className="object-cover object-center brightness-[1.05] md:object-contain"
+                  sizes="100vw"
+                />
+              )}
             </div>
           ))}
         </div>
@@ -631,27 +647,38 @@ export default function ProjectDetailPageContent({
                     style={{ width: `${100 / detailSlides.length}%` }}
                   >
                     {/* TODO: replace placeholder with final project imagery. */}
-                    <Image
-                      src={resolveProjectImageSrc(media)}
-                      alt={media.alt}
-                      fill
-                      quality={90}
-                      className={
-                        isStElmoProject
-                          ? "object-contain object-center brightness-[1.04]"
-                          : "object-cover object-center brightness-[1.04]"
-                      }
-                      style={
-                        isStElmoProject
-                          ? { objectFit: "contain", objectPosition: "center" }
-                          : undefined
-                      }
-                      sizes={
-                        isStElmoProject
-                          ? stElmoResponsiveSizes
-                          : "(min-width: 1024px) 50vw, 100vw"
-                      }
-                    />
+                    {isStElmoProject ? (
+                      <>
+                        <Image
+                          src={resolveProjectImageSrc(media)}
+                          alt=""
+                          fill
+                          aria-hidden
+                          quality={90}
+                          className="pointer-events-none object-cover object-center opacity-60"
+                          style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                          sizes={stElmoResponsiveSizes}
+                        />
+                        <Image
+                          src={resolveProjectImageSrc(media)}
+                          alt={media.alt}
+                          fill
+                          quality={90}
+                          className="object-contain object-center brightness-[1.04]"
+                          style={{ objectFit: "contain", objectPosition: "center" }}
+                          sizes={stElmoResponsiveSizes}
+                        />
+                      </>
+                    ) : (
+                      <Image
+                        src={resolveProjectImageSrc(media)}
+                        alt={media.alt}
+                        fill
+                        quality={90}
+                        className="object-cover object-center brightness-[1.04]"
+                        sizes="(min-width: 1024px) 50vw, 100vw"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/2" aria-hidden />
                   </div>
                 );
@@ -871,24 +898,40 @@ export default function ProjectDetailPageContent({
               style={{ width: `${100 / suiteSlides.length}%` }}
             >
               {/* TODO: replace placeholder with final project imagery. */}
-              <Image
-                src={resolveProjectImageSrc(slide.image)}
-                alt={slide.image.alt}
-                fill
-                priority={index === 0}
-                quality={90}
-                className={
-                  isStElmoProject
-                    ? "object-contain object-center"
-                    : "object-cover object-center md:object-contain"
-                }
-                style={
-                  isStElmoProject
-                    ? { objectFit: "contain", objectPosition: "center" }
-                    : undefined
-                }
-                sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
-              />
+              {isStElmoProject ? (
+                <>
+                  <Image
+                    src={resolveProjectImageSrc(slide.image)}
+                    alt=""
+                    fill
+                    aria-hidden
+                    quality={90}
+                    className="pointer-events-none object-cover object-center opacity-60"
+                    style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                    sizes={stElmoResponsiveSizes}
+                  />
+                  <Image
+                    src={resolveProjectImageSrc(slide.image)}
+                    alt={slide.image.alt}
+                    fill
+                    priority={index === 0}
+                    quality={90}
+                    className="object-contain object-center"
+                    style={{ objectFit: "contain", objectPosition: "center" }}
+                    sizes={stElmoResponsiveSizes}
+                  />
+                </>
+              ) : (
+                <Image
+                  src={resolveProjectImageSrc(slide.image)}
+                  alt={slide.image.alt}
+                  fill
+                  priority={index === 0}
+                  quality={90}
+                  className="object-cover object-center md:object-contain"
+                  sizes="100vw"
+                />
+              )}
             </div>
           ))}
         </div>
@@ -948,27 +991,38 @@ export default function ProjectDetailPageContent({
             }
           >
             {/* TODO: replace placeholder with final project imagery. */}
-            <Image
-              src={resolveProjectImageSrc(splitTwoImage)}
-              alt={splitTwoImage.alt}
-              fill
-              quality={90}
-              className={
-                isStElmoProject
-                  ? "object-contain object-center brightness-[1.04]"
-                  : "object-cover object-center brightness-[1.04] md:object-contain"
-              }
-              style={
-                isStElmoProject
-                  ? { objectFit: "contain", objectPosition: "center" }
-                  : undefined
-              }
-              sizes={
-                isStElmoProject
-                  ? stElmoResponsiveSizes
-                  : "(min-width: 1024px) 50vw, 100vw"
-              }
-            />
+            {isStElmoProject ? (
+              <>
+                <Image
+                  src={resolveProjectImageSrc(splitTwoImage)}
+                  alt=""
+                  fill
+                  aria-hidden
+                  quality={90}
+                  className="pointer-events-none object-cover object-center opacity-60"
+                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+                <Image
+                  src={resolveProjectImageSrc(splitTwoImage)}
+                  alt={splitTwoImage.alt}
+                  fill
+                  quality={90}
+                  className="object-contain object-center brightness-[1.04]"
+                  style={{ objectFit: "contain", objectPosition: "center" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+              </>
+            ) : (
+              <Image
+                src={resolveProjectImageSrc(splitTwoImage)}
+                alt={splitTwoImage.alt}
+                fill
+                quality={90}
+                className="object-cover object-center brightness-[1.04] md:object-contain"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
+            )}
           </div>
           <div className="flex h-[280px] w-full items-center border-b border-t border-white bg-[#efefef] px-8 lg:h-[560px] lg:w-1/2 lg:px-20">
             <motion.p
@@ -1002,23 +1056,38 @@ export default function ProjectDetailPageContent({
             }}
           >
             {/* TODO: replace placeholder with final project imagery. */}
-            <Image
-              src={resolveProjectImageSrc(sectionSixImages[0])}
-              alt={sectionSixImages[0].alt}
-              fill
-              quality={90}
-              className={
-                isStElmoProject
-                  ? "object-contain object-center"
-                  : "object-cover object-center md:object-contain"
-              }
-              style={
-                isStElmoProject
-                  ? { objectFit: "contain", objectPosition: "center" }
-                  : undefined
-              }
-              sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
-            />
+            {isStElmoProject ? (
+              <>
+                <Image
+                  src={resolveProjectImageSrc(sectionSixImages[0])}
+                  alt=""
+                  fill
+                  aria-hidden
+                  quality={90}
+                  className="pointer-events-none object-cover object-center opacity-60"
+                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+                <Image
+                  src={resolveProjectImageSrc(sectionSixImages[0])}
+                  alt={sectionSixImages[0].alt}
+                  fill
+                  quality={90}
+                  className="object-contain object-center"
+                  style={{ objectFit: "contain", objectPosition: "center" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+              </>
+            ) : (
+              <Image
+                src={resolveProjectImageSrc(sectionSixImages[0])}
+                alt={sectionSixImages[0].alt}
+                fill
+                quality={90}
+                className="object-cover object-center md:object-contain"
+                sizes="100vw"
+              />
+            )}
           </motion.div>
           <motion.div
             className="absolute inset-0"
@@ -1028,23 +1097,38 @@ export default function ProjectDetailPageContent({
             }}
           >
             {/* TODO: replace placeholder with final project imagery. */}
-            <Image
-              src={resolveProjectImageSrc(sectionSixImages[1])}
-              alt={sectionSixImages[1].alt}
-              fill
-              quality={90}
-              className={
-                isStElmoProject
-                  ? "object-contain object-center"
-                  : "object-cover object-center md:object-contain"
-              }
-              style={
-                isStElmoProject
-                  ? { objectFit: "contain", objectPosition: "center" }
-                  : undefined
-              }
-              sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
-            />
+            {isStElmoProject ? (
+              <>
+                <Image
+                  src={resolveProjectImageSrc(sectionSixImages[1])}
+                  alt=""
+                  fill
+                  aria-hidden
+                  quality={90}
+                  className="pointer-events-none object-cover object-center opacity-60"
+                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+                <Image
+                  src={resolveProjectImageSrc(sectionSixImages[1])}
+                  alt={sectionSixImages[1].alt}
+                  fill
+                  quality={90}
+                  className="object-contain object-center"
+                  style={{ objectFit: "contain", objectPosition: "center" }}
+                  sizes={stElmoResponsiveSizes}
+                />
+              </>
+            ) : (
+              <Image
+                src={resolveProjectImageSrc(sectionSixImages[1])}
+                alt={sectionSixImages[1].alt}
+                fill
+                quality={90}
+                className="object-cover object-center md:object-contain"
+                sizes="100vw"
+              />
+            )}
           </motion.div>
         </div>
       </motion.section>
