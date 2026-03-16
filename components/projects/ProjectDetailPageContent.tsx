@@ -458,7 +458,7 @@ export default function ProjectDetailPageContent({
         ref={heroSectionRef}
         className={
           isStElmoProject
-            ? "relative min-h-[520px] w-full overflow-hidden bg-black text-white sm:min-h-[600px] lg:min-h-[680px]"
+            ? "relative min-h-[520px] w-full overflow-hidden bg-[#111] text-white sm:min-h-[600px] lg:min-h-[680px]"
             : "relative h-svh min-h-[700px] overflow-hidden bg-black text-white sm:min-h-[760px]"
         }
         style={isStElmoProject ? { aspectRatio: "16 / 9" } : undefined}
@@ -488,12 +488,12 @@ export default function ProjectDetailPageContent({
                 quality={90}
                 className={
                   isStElmoProject
-                    ? "object-cover object-center brightness-[1.05]"
+                    ? "object-contain object-center brightness-[1.05]"
                     : "object-cover object-center brightness-[1.05] md:object-contain"
                 }
                 style={
                   isStElmoProject
-                    ? { objectFit: "cover", objectPosition: "center" }
+                    ? { objectFit: "contain", objectPosition: "center" }
                     : undefined
                 }
                 sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
@@ -638,12 +638,12 @@ export default function ProjectDetailPageContent({
                       quality={90}
                       className={
                         isStElmoProject
-                          ? "object-cover object-center brightness-[1.04]"
+                          ? "object-contain object-center brightness-[1.04]"
                           : "object-cover object-center brightness-[1.04]"
                       }
                       style={
                         isStElmoProject
-                          ? { objectFit: "cover", objectPosition: "center" }
+                          ? { objectFit: "contain", objectPosition: "center" }
                           : undefined
                       }
                       sizes={
@@ -849,7 +849,9 @@ export default function ProjectDetailPageContent({
 
       <motion.section
         ref={suiteSectionRef}
-        className="relative h-svh min-h-[700px] overflow-hidden bg-black text-white sm:min-h-[760px]"
+        className={`relative h-svh min-h-[700px] overflow-hidden text-white sm:min-h-[760px] ${
+          isStElmoProject ? "bg-[#111]" : "bg-black"
+        }`}
         style={{ opacity: prefersReducedMotion ? 1 : suiteSectionOpacity }}
       >
         <div
@@ -877,12 +879,12 @@ export default function ProjectDetailPageContent({
                 quality={90}
                 className={
                   isStElmoProject
-                    ? "object-cover object-center"
+                    ? "object-contain object-center"
                     : "object-cover object-center md:object-contain"
                 }
                 style={
                   isStElmoProject
-                    ? { objectFit: "cover", objectPosition: "center" }
+                    ? { objectFit: "contain", objectPosition: "center" }
                     : undefined
                 }
                 sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
@@ -953,12 +955,12 @@ export default function ProjectDetailPageContent({
               quality={90}
               className={
                 isStElmoProject
-                  ? "object-cover object-center brightness-[1.04]"
+                  ? "object-contain object-center brightness-[1.04]"
                   : "object-cover object-center brightness-[1.04] md:object-contain"
               }
               style={
                 isStElmoProject
-                  ? { objectFit: "cover", objectPosition: "center" }
+                  ? { objectFit: "contain", objectPosition: "center" }
                   : undefined
               }
               sizes={
@@ -987,7 +989,11 @@ export default function ProjectDetailPageContent({
         ref={fullBleedTwoRef}
         className="relative min-h-[140svh] bg-[#171310]"
       >
-        <div className="sticky top-0 h-svh overflow-hidden">
+        <div
+          className={`sticky top-0 h-svh overflow-hidden ${
+            isStElmoProject ? "bg-[#111]" : ""
+          }`}
+        >
           <motion.div
             className="absolute inset-0"
             style={{
@@ -1003,12 +1009,12 @@ export default function ProjectDetailPageContent({
               quality={90}
               className={
                 isStElmoProject
-                  ? "object-cover object-center"
+                  ? "object-contain object-center"
                   : "object-cover object-center md:object-contain"
               }
               style={
                 isStElmoProject
-                  ? { objectFit: "cover", objectPosition: "center" }
+                  ? { objectFit: "contain", objectPosition: "center" }
                   : undefined
               }
               sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
@@ -1029,12 +1035,12 @@ export default function ProjectDetailPageContent({
               quality={90}
               className={
                 isStElmoProject
-                  ? "object-cover object-center"
+                  ? "object-contain object-center"
                   : "object-cover object-center md:object-contain"
               }
               style={
                 isStElmoProject
-                  ? { objectFit: "cover", objectPosition: "center" }
+                  ? { objectFit: "contain", objectPosition: "center" }
                   : undefined
               }
               sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
