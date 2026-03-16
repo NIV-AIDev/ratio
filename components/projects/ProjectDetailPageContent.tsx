@@ -3,12 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import Container from "@/components/ui/container";
 import {
   resolveProjectImageSrc,
   type ContinueJourneyCard,
   type ProjectEntry,
+  type ProjectImage,
 } from "@/lib/projects/data";
 
 type ProjectDetailPageContentProps = {
@@ -33,6 +40,91 @@ const journeyCardAccents = [
   "from-[#d8d6e8]/50 via-[#bab0da]/30 to-transparent",
 ];
 
+const extractImageFileName = (src: string) => {
+  const segments = src.split(/[/\\]/);
+  return decodeURIComponent(segments[segments.length - 1] ?? src);
+};
+
+const getLastNumericToken = (src: string) => {
+  const numericTokens = extractImageFileName(src).match(/\d+/g);
+
+  if (!numericTokens || numericTokens.length === 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Number.parseInt(numericTokens[numericTokens.length - 1], 10);
+};
+
+const compareImageSourcesByNumericOrder = (leftSrc: string, rightSrc: string) => {
+  const leftNumericToken = getLastNumericToken(leftSrc);
+  const rightNumericToken = getLastNumericToken(rightSrc);
+
+  if (leftNumericToken !== rightNumericToken) {
+    return leftNumericToken - rightNumericToken;
+  }
+
+  return extractImageFileName(leftSrc).localeCompare(extractImageFileName(rightSrc), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+};
+
+const dedupeProjectImages = (images: ProjectImage[]) => {
+  const seen = new Set<string>();
+
+  return images.filter((image) => {
+    if (seen.has(image.src)) {
+      return false;
+    }
+
+    seen.add(image.src);
+    return true;
+  });
+};
+
+const selectUniqueProjectImages = (
+  images: ProjectImage[],
+  preferredIndexes: number[],
+  minimumCount = 2,
+) => {
+  const selected: ProjectImage[] = [];
+  const selectedSources = new Set<string>();
+
+  for (const index of preferredIndexes) {
+    const image = images[index];
+
+    if (!image || selectedSources.has(image.src)) {
+      continue;
+    }
+
+    selected.push(image);
+    selectedSources.add(image.src);
+
+    if (selected.length >= minimumCount) {
+      return selected;
+    }
+  }
+
+  for (const image of images) {
+    if (selectedSources.has(image.src)) {
+      continue;
+    }
+
+    selected.push(image);
+    selectedSources.add(image.src);
+
+    if (selected.length >= minimumCount) {
+      return selected;
+    }
+  }
+
+  if (selected.length === 1) {
+    selected.push(selected[0]);
+  }
+
+  return selected.length > 0 ? selected : [images[0], images[0]];
+};
+
 export default function ProjectDetailPageContent({
   project,
   continueJourneyCards,
@@ -41,6 +133,10 @@ export default function ProjectDetailPageContent({
   const [isDesktop, setIsDesktop] = useState(false);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [activeDetailIndex, setActiveDetailIndex] = useState(0);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [shouldCenterGalleryThumbnails, setShouldCenterGalleryThumbnails] =
+    useState(false);
   const [activeSuiteIndex, setActiveSuiteIndex] = useState(0);
 
   const heroSectionRef = useRef<HTMLElement | null>(null);
@@ -52,6 +148,7 @@ export default function ProjectDetailPageContent({
   const heritageSectionRef = useRef<HTMLElement | null>(null);
   const journeyIntroSectionRef = useRef<HTMLElement | null>(null);
   const journeyCardsSectionRef = useRef<HTMLElement | null>(null);
+  const galleryThumbnailsTrackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
@@ -61,8 +158,67 @@ export default function ProjectDetailPageContent({
     return () => mediaQuery.removeEventListener("change", sync);
   }, []);
 
-  const heroSlides = useMemo(() => project.heroSlides, [project.heroSlides]);
+  const galleryImages = useMemo(() => {
+    const sourceImages =
+      project.galleryImages && project.galleryImages.length > 0
+        ? project.galleryImages
+        : [
+            ...project.heroSlides,
+            ...project.splitImages,
+            ...project.fullBleedImages,
+          ];
+
+    return dedupeProjectImages(sourceImages).sort((left, right) =>
+      compareImageSourcesByNumericOrder(left.src, right.src),
+    );
+  }, [project.fullBleedImages, project.galleryImages, project.heroSlides, project.splitImages]);
+
+  const safeGalleryImages = useMemo(() => {
+    if (galleryImages.length > 0) {
+      return galleryImages;
+    }
+
+    return [project.heroSlides[0]];
+  }, [galleryImages, project.heroSlides]);
+
+  const heroSlides = useMemo(
+    () => safeGalleryImages.slice(0, Math.min(4, safeGalleryImages.length)),
+    [safeGalleryImages],
+  );
   const heroCount = heroSlides.length;
+
+  const detailMediaSlides = useMemo<[ProjectImage, ProjectImage]>(() => {
+    const totalImages = safeGalleryImages.length;
+
+    return [
+      safeGalleryImages[1 % totalImages] ?? safeGalleryImages[0],
+      safeGalleryImages[2 % totalImages] ?? safeGalleryImages[0],
+    ];
+  }, [safeGalleryImages]);
+
+  const splitTwoImage = useMemo(
+    () => safeGalleryImages[3 % safeGalleryImages.length] ?? safeGalleryImages[0],
+    [safeGalleryImages],
+  );
+
+  const sectionFourImages = useMemo(() => {
+    const lastIndex = safeGalleryImages.length - 1;
+    return selectUniqueProjectImages(safeGalleryImages, [
+      Math.min(1, lastIndex),
+      Math.min(3, lastIndex),
+      Math.min(2, lastIndex),
+      0,
+    ]);
+  }, [safeGalleryImages]);
+
+  const sectionSixImages = useMemo(() => {
+    const lastIndex = safeGalleryImages.length - 1;
+    return selectUniqueProjectImages(safeGalleryImages, [
+      Math.max(0, lastIndex - 1),
+      lastIndex,
+      0,
+    ]);
+  }, [safeGalleryImages]);
 
   const detailSlides = useMemo(
     () => [
@@ -80,90 +236,43 @@ export default function ProjectDetailPageContent({
     [project.location, project.summary],
   );
 
-  const suiteSlides = useMemo(() => {
-    const defaultFirstSlideImage = project.heroSlides[2] ?? project.heroSlides[0];
-    const defaultSecondSlideImage =
-      project.splitImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0];
+  const firstSuiteTitle =
+    project.slug === "the-croft-project"
+      ? "The Kitchen"
+      : project.slug.startsWith("the-durham-project")
+        ? "Private Suite"
+        : "Living Suite";
 
-    if (project.slug === "the-croft-project") {
-      return [
-        {
-          title: "The Kitchen",
-          subtitle: "Suite",
-          image: defaultSecondSlideImage,
-        },
-        {
-          title: "Private Suite",
-          subtitle: "Refined",
-          image: defaultFirstSlideImage,
-        },
-      ];
-    }
-
-    if (project.slug === "the-fulwell-project") {
-      return [
-        {
-          title: "Living Suite",
-          subtitle: "Suite",
-          image: defaultFirstSlideImage,
-        },
-        {
-          title: "Private Suite",
-          subtitle: "Refined",
-          image: project.fullBleedImages[0] ?? defaultFirstSlideImage,
-        },
-      ];
-    }
-
-    if (project.slug === "the-pound-project-1") {
-      return [
-        {
-          title: "Living Suite",
-          subtitle: "Suite",
-          image: defaultFirstSlideImage,
-        },
-        {
-          title: "Private Suite",
-          subtitle: "Refined",
-          image: project.heroSlides[1] ?? defaultFirstSlideImage,
-        },
-      ];
-    }
-
-    const firstSlideTitle =
-      project.slug === "the-bryant-project"
-        ? "The Kitchen"
-        : project.slug.startsWith("the-durham-project")
-          ? "Private Suite"
-          : "Living Suite";
-
-    return [
+  const suiteSlides = useMemo(
+    () => [
       {
-        title: firstSlideTitle,
-        subtitle: firstSlideTitle === "Private Suite" ? "Refined" : "Suite",
-        image: defaultSecondSlideImage,
+        title: firstSuiteTitle,
+        subtitle: firstSuiteTitle === "Private Suite" ? "Refined" : "Suite",
+        image: sectionFourImages[0],
       },
       {
         title: "Private Suite",
         subtitle: "Refined",
-        image: defaultFirstSlideImage,
+        image: sectionFourImages[1],
       },
-    ];
-  }, [project.fullBleedImages, project.heroSlides, project.slug, project.splitImages]);
-
-  const fullBleedOneImage = useMemo(
-    () =>
-      project.slug === "the-fulwell-project"
-        ? project.splitImages[1] ?? project.fullBleedImages[0] ?? project.heroSlides[0]
-        : project.fullBleedImages[0] ?? project.heroSlides[0],
-    [project.fullBleedImages, project.heroSlides, project.slug, project.splitImages],
+    ],
+    [firstSuiteTitle, sectionFourImages],
   );
 
-  const activeHero = heroSlides[activeHeroIndex] ?? heroSlides[0];
+  const resolvedActiveHeroIndex = activeHeroIndex % heroCount;
+  const resolvedActiveGalleryIndex = activeGalleryIndex % safeGalleryImages.length;
+  const resolvedActiveSuiteIndex = activeSuiteIndex % suiteSlides.length;
+
+  const activeHero = heroSlides[resolvedActiveHeroIndex] ?? heroSlides[0];
+  const activeGalleryImage =
+    safeGalleryImages[resolvedActiveGalleryIndex] ?? safeGalleryImages[0];
   const activeDetail = detailSlides[activeDetailIndex] ?? detailSlides[0];
-  const activeSuite = suiteSlides[activeSuiteIndex] ?? suiteSlides[0];
+  const activeSuite = suiteSlides[resolvedActiveSuiteIndex] ?? suiteSlides[0];
   const revealDistance = isDesktop ? 20 : 12;
   const fadeUpInEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+  const isStElmoProject = project.slug === "st-elmo";
+  const stElmoResponsiveSizes =
+    "(max-width: 768px) 100vw, (max-width: 1024px) 90vw, (max-width: 1400px) 80vw, 70vw";
 
   const heroTransition = prefersReducedMotion
     ? "transform 0.01s linear"
@@ -222,7 +331,7 @@ export default function ProjectDetailPageContent({
   const splitCopyY = useTransform(splitProgress, [0.1, 0.56], [revealDistance, 0]);
 
   const fullBleedOneOpacity = useTransform(fullBleedOneProgress, [0, 0.2], [0.985, 1]);
-  const fullBleedOneImageY = useTransform(fullBleedOneProgress, [0, 1], [12, -12]);
+  const fullBleedOneY = useTransform(fullBleedOneProgress, [0, 1], [10, -10]);
 
   const suiteSectionOpacity = useTransform(suiteProgress, [0, 0.22], [0.985, 1]);
   const suiteCopyOpacity = useTransform(suiteProgress, [0.12, 0.54], [0, 1]);
@@ -232,8 +341,10 @@ export default function ProjectDetailPageContent({
   const splitTwoCopyOpacity = useTransform(splitTwoProgress, [0.12, 0.56], [0, 1]);
   const splitTwoCopyY = useTransform(splitTwoProgress, [0.12, 0.56], [revealDistance, 0]);
 
-  const fullBleedTwoOpacity = useTransform(fullBleedTwoProgress, [0, 0.2], [0.985, 1]);
-  const fullBleedTwoImageY = useTransform(fullBleedTwoProgress, [0, 1], [12, -12]);
+  const sectionSixFirstOpacity = useTransform(fullBleedTwoProgress, [0.1, 0.8], [1, 0]);
+  const sectionSixSecondOpacity = useTransform(fullBleedTwoProgress, [0.1, 0.8], [0, 1]);
+  const sectionSixFirstScale = useTransform(fullBleedTwoProgress, [0, 1], [1.01, 1.07]);
+  const sectionSixSecondScale = useTransform(fullBleedTwoProgress, [0, 1], [0.95, 1.03]);
 
   const heritageBlockOpacity = useTransform(heritageProgress, [0.08, 0.52], [0, 1]);
   const heritageBlockY = useTransform(heritageProgress, [0.08, 0.52], [revealDistance, 0]);
@@ -250,6 +361,16 @@ export default function ProjectDetailPageContent({
 
   const previousHero = () => {
     setActiveHeroIndex((current) => (current - 1 + heroCount) % heroCount);
+  };
+
+  const nextGalleryImage = () => {
+    setActiveGalleryIndex((current) => (current + 1) % safeGalleryImages.length);
+  };
+
+  const previousGalleryImage = () => {
+    setActiveGalleryIndex(
+      (current) => (current - 1 + safeGalleryImages.length) % safeGalleryImages.length,
+    );
   };
 
   const nextSuite = () => {
@@ -284,17 +405,71 @@ export default function ProjectDetailPageContent({
     return () => window.clearInterval(suiteInterval);
   }, [prefersReducedMotion, suiteSlides.length]);
 
+  useEffect(() => {
+    if (prefersReducedMotion || safeGalleryImages.length < 2 || isGalleryModalOpen) {
+      return;
+    }
+
+    const galleryInterval = window.setInterval(() => {
+      setActiveGalleryIndex((current) => (current + 1) % safeGalleryImages.length);
+    }, 5200);
+
+    return () => window.clearInterval(galleryInterval);
+  }, [isGalleryModalOpen, prefersReducedMotion, safeGalleryImages.length]);
+
+  useEffect(() => {
+    if (!isGalleryModalOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsGalleryModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isGalleryModalOpen]);
+
+  useEffect(() => {
+    const thumbnailsTrack = galleryThumbnailsTrackRef.current;
+
+    if (!thumbnailsTrack) {
+      return;
+    }
+
+    const syncGalleryThumbnailAlignment = () => {
+      const canCenterThumbnails =
+        thumbnailsTrack.scrollWidth <= thumbnailsTrack.clientWidth + 1;
+      setShouldCenterGalleryThumbnails(canCenterThumbnails);
+    };
+
+    syncGalleryThumbnailAlignment();
+    window.addEventListener("resize", syncGalleryThumbnailAlignment);
+
+    return () =>
+      window.removeEventListener("resize", syncGalleryThumbnailAlignment);
+  }, [safeGalleryImages.length]);
+
   return (
     <article className="overflow-x-clip bg-[#f6f3ef] text-[#1a1a18]">
       <motion.section
         ref={heroSectionRef}
-        className="relative h-svh min-h-[700px] overflow-hidden bg-black text-white sm:min-h-[760px]"
+        className={
+          isStElmoProject
+            ? "relative min-h-[520px] w-full overflow-hidden bg-black text-white sm:min-h-[600px] lg:min-h-[680px]"
+            : "relative h-svh min-h-[700px] overflow-hidden bg-black text-white sm:min-h-[760px]"
+        }
+        style={isStElmoProject ? { aspectRatio: "16 / 9" } : undefined}
       >
         <div
           className="absolute inset-0 flex h-full w-full"
           style={{
             width: `${heroCount * 100}%`,
-            transform: `translateX(-${activeHeroIndex * (100 / heroCount)}%)`,
+            transform: `translateX(-${
+              resolvedActiveHeroIndex * (100 / heroCount)
+            }%)`,
             transition: heroTransition,
           }}
         >
@@ -311,14 +486,23 @@ export default function ProjectDetailPageContent({
                 fill
                 priority={index === 0}
                 quality={90}
-                className="object-cover"
-                sizes="100vw"
+                className={
+                  isStElmoProject
+                    ? "object-cover object-center brightness-[1.05]"
+                    : "object-cover object-center brightness-[1.05] md:object-contain"
+                }
+                style={
+                  isStElmoProject
+                    ? { objectFit: "cover", objectPosition: "center" }
+                    : undefined
+                }
+                sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
               />
             </div>
           ))}
         </div>
 
-        <div className="absolute inset-0 bg-linear-to-b from-black/6 via-black/10 to-black/42" aria-hidden />
+        <div className="absolute inset-0 bg-linear-to-b from-black/2 via-black/8 to-black/30" aria-hidden />
 
         <Container className="relative z-10 flex h-full items-end pb-[calc(4rem+env(safe-area-inset-bottom))] pt-30 sm:pt-34 lg:pb-18">
           <motion.div
@@ -375,7 +559,7 @@ export default function ProjectDetailPageContent({
 
             <div className="flex items-center gap-2 pt-2" aria-label="Project hero slides">
               {heroSlides.map((slide, index) => {
-                const isActive = activeHeroIndex === index;
+                const isActive = resolvedActiveHeroIndex === index;
                 return (
                   <button
                     key={slide.src}
@@ -423,7 +607,12 @@ export default function ProjectDetailPageContent({
         style={{ opacity: prefersReducedMotion ? 1 : splitSectionOpacity }}
       >
         <div className="flex flex-col lg:min-h-[650px] lg:flex-row">
-          <div className="relative h-[54svh] min-h-[380px] max-h-[560px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[650px] lg:w-1/2">
+          <div
+            className={`relative h-[54svh] min-h-[380px] max-h-[560px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[650px] lg:w-1/2 ${
+              isStElmoProject ? "bg-[#111]" : ""
+            }`}
+            style={isStElmoProject ? { aspectRatio: "3 / 2" } : undefined}
+          >
             <div
               className="absolute inset-0 flex"
               style={{
@@ -433,10 +622,7 @@ export default function ProjectDetailPageContent({
               }}
             >
               {detailSlides.map((slide, index) => {
-                const media =
-                  index === 0
-                    ? project.splitImages[0] ?? project.heroSlides[0]
-                    : project.splitImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0];
+                const media = detailMediaSlides[index] ?? detailMediaSlides[0];
 
                 return (
                   <div
@@ -450,10 +636,23 @@ export default function ProjectDetailPageContent({
                       alt={media.alt}
                       fill
                       quality={90}
-                      className="object-cover"
-                      sizes="(min-width: 1024px) 50vw, 100vw"
+                      className={
+                        isStElmoProject
+                          ? "object-cover object-center brightness-[1.04]"
+                          : "object-cover object-center brightness-[1.04]"
+                      }
+                      style={
+                        isStElmoProject
+                          ? { objectFit: "cover", objectPosition: "center" }
+                          : undefined
+                      }
+                      sizes={
+                        isStElmoProject
+                          ? stElmoResponsiveSizes
+                          : "(min-width: 1024px) 50vw, 100vw"
+                      }
                     />
-                    <div className="absolute inset-0 bg-black/4" aria-hidden />
+                    <div className="absolute inset-0 bg-black/2" aria-hidden />
                   </div>
                 );
               })}
@@ -521,23 +720,131 @@ export default function ProjectDetailPageContent({
 
       <motion.section
         ref={fullBleedOneRef}
-        className="relative h-[700px] overflow-hidden lg:h-[800px]"
-        style={{ opacity: prefersReducedMotion ? 1 : fullBleedOneOpacity }}
+        className="bg-[#efefef] py-14 sm:py-16 lg:py-20"
+        style={{
+          opacity: prefersReducedMotion ? 1 : fullBleedOneOpacity,
+          y: prefersReducedMotion ? 0 : fullBleedOneY,
+        }}
       >
-        <motion.div
-          className="absolute inset-0"
-          style={{ y: prefersReducedMotion ? 0 : fullBleedOneImageY }}
-        >
-          {/* TODO: replace placeholder with final project imagery. */}
-          <Image
-            src={resolveProjectImageSrc(fullBleedOneImage)}
-            alt={fullBleedOneImage.alt}
-            fill
-            quality={90}
-            className="object-cover"
-            sizes="100vw"
-          />
-        </motion.div>
+        <Container className="max-w-[1180px]">
+          <div className="space-y-5">
+            <button
+              type="button"
+              onClick={() => setIsGalleryModalOpen(true)}
+              className="group relative block w-full rounded-[22px] p-[1px] text-left transition-[transform,box-shadow] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_28px_46px_rgba(33,24,12,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ab9468]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#efefef]"
+              aria-label={`Open image ${resolvedActiveGalleryIndex + 1} in fullscreen`}
+            >
+              <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(135deg,rgba(255,255,255,0.82)_0%,rgba(219,199,165,0.72)_22%,rgba(157,125,84,0.78)_52%,rgba(238,228,209,0.76)_100%)] opacity-92 transition-opacity duration-700 group-hover:opacity-100" />
+              <span className="pointer-events-none absolute -inset-2 rounded-[28px] bg-[radial-gradient(circle_at_20%_12%,rgba(255,255,255,0.45),transparent_42%),radial-gradient(circle_at_78%_92%,rgba(172,141,98,0.24),transparent_56%)] opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
+              <span className="relative block rounded-[22px] bg-[#f7f5f2]/95 p-2 shadow-[0_12px_26px_rgba(33,24,12,0.14),inset_0_1px_0_rgba(255,255,255,0.76)] transition-shadow duration-700 group-hover:shadow-[0_18px_34px_rgba(33,24,12,0.2),inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-3">
+                <div
+                  className={`relative h-[54svh] min-h-[340px] overflow-hidden rounded-[16px] [perspective:1200px] [transform-style:preserve-3d] sm:h-[62svh] lg:h-[72svh] ${
+                    isStElmoProject ? "bg-[#111]" : ""
+                  }`}
+                  style={isStElmoProject ? { aspectRatio: "3 / 2" } : undefined}
+                >
+                  {safeGalleryImages.map((image, index) => {
+                    const isActive = resolvedActiveGalleryIndex === index;
+                    return (
+                      <motion.div
+                        key={image.src}
+                        className="absolute inset-0"
+                        initial={false}
+                        animate={
+                          isActive
+                            ? { opacity: 1, scale: 1.01, z: 0, filter: "blur(0px)" }
+                            : { opacity: 0, scale: 0.95, z: -72, filter: "blur(0.8px)" }
+                        }
+                        transition={{
+                          duration: prefersReducedMotion ? 0.01 : 1.06,
+                          ease: revealEase,
+                        }}
+                      >
+                        {/* TODO: replace placeholder with final project imagery. */}
+                        <Image
+                          src={resolveProjectImageSrc(image)}
+                          alt={image.alt}
+                          fill
+                          quality={90}
+                          className="object-contain object-center"
+                          style={
+                            isStElmoProject
+                              ? { objectFit: "contain", objectPosition: "center" }
+                              : undefined
+                          }
+                          sizes={
+                            isStElmoProject
+                              ? stElmoResponsiveSizes
+                              : "(min-width: 1024px) 92vw, 100vw"
+                          }
+                          priority={index === 0}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </span>
+            </button>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[11px] uppercase tracking-[0.26em] text-[#8f8679]">
+                Gallery image {resolvedActiveGalleryIndex + 1} / {safeGalleryImages.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={previousGalleryImage}
+                  aria-label="Show previous gallery image"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#cdbd9f] text-[#8f7a58] transition-colors duration-300 hover:border-[#ab9468] hover:text-[#ab9468]"
+                >
+                  <span aria-hidden>←</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={nextGalleryImage}
+                  aria-label="Show next gallery image"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#cdbd9f] text-[#8f7a58] transition-colors duration-300 hover:border-[#ab9468] hover:text-[#ab9468]"
+                >
+                  <span aria-hidden>→</span>
+                </button>
+              </div>
+            </div>
+
+            <div
+              ref={galleryThumbnailsTrackRef}
+              className={`flex gap-3 overflow-x-auto pb-1 ${
+                shouldCenterGalleryThumbnails ? "justify-center" : ""
+              }`}
+            >
+              {safeGalleryImages.map((image, index) => {
+                const isActive = index === resolvedActiveGalleryIndex;
+                return (
+                  <button
+                    key={`${image.src}-${index}`}
+                    type="button"
+                    onClick={() => setActiveGalleryIndex(index)}
+                    className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border transition-all duration-300 sm:h-24 sm:w-[8.5rem] ${
+                      isActive
+                        ? "border-[#ab9468] ring-2 ring-[#ab9468]/35"
+                        : "border-[#d4cec4] hover:border-[#b9ab96]"
+                    }`}
+                    aria-label={`Select gallery image ${index + 1}`}
+                    aria-current={isActive}
+                  >
+                    <Image
+                      src={resolveProjectImageSrc(image)}
+                      alt={image.alt}
+                      fill
+                      quality={85}
+                      className="object-cover object-center"
+                      sizes="136px"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Container>
       </motion.section>
 
       <motion.section
@@ -549,7 +856,9 @@ export default function ProjectDetailPageContent({
           className="absolute inset-0 flex h-full w-full"
           style={{
             width: `${suiteSlides.length * 100}%`,
-            transform: `translateX(-${activeSuiteIndex * (100 / suiteSlides.length)}%)`,
+            transform: `translateX(-${
+              resolvedActiveSuiteIndex * (100 / suiteSlides.length)
+            }%)`,
             transition: heroTransition,
           }}
         >
@@ -566,13 +875,21 @@ export default function ProjectDetailPageContent({
                 fill
                 priority={index === 0}
                 quality={90}
-                className="object-cover"
-                sizes="100vw"
+                className={
+                  isStElmoProject
+                    ? "object-cover object-center"
+                    : "object-cover object-center md:object-contain"
+                }
+                style={
+                  isStElmoProject
+                    ? { objectFit: "cover", objectPosition: "center" }
+                    : undefined
+                }
+                sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
               />
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 bg-black/12" aria-hidden />
 
         <Container className="relative z-10 flex h-full items-end pb-[calc(4rem+env(safe-area-inset-bottom))] pt-28 sm:pt-32 lg:pb-18">
           <motion.div
@@ -618,15 +935,37 @@ export default function ProjectDetailPageContent({
         style={{ opacity: prefersReducedMotion ? 1 : splitTwoSectionOpacity }}
       >
         <div className="flex min-h-[560px] flex-col lg:flex-row">
-          <div className="relative h-[280px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[560px] lg:w-1/2">
+          <div
+            className={`relative h-[280px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[560px] lg:w-1/2 ${
+              isStElmoProject ? "bg-[#111]" : ""
+            }`}
+            style={
+              isStElmoProject
+                ? { aspectRatio: "3 / 2", height: "auto" }
+                : undefined
+            }
+          >
             {/* TODO: replace placeholder with final project imagery. */}
             <Image
-              src={resolveProjectImageSrc(project.splitImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0])}
-              alt={(project.splitImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0]).alt}
+              src={resolveProjectImageSrc(splitTwoImage)}
+              alt={splitTwoImage.alt}
               fill
               quality={90}
-              className="object-cover"
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              className={
+                isStElmoProject
+                  ? "object-cover object-center brightness-[1.04]"
+                  : "object-cover object-center brightness-[1.04] md:object-contain"
+              }
+              style={
+                isStElmoProject
+                  ? { objectFit: "cover", objectPosition: "center" }
+                  : undefined
+              }
+              sizes={
+                isStElmoProject
+                  ? stElmoResponsiveSizes
+                  : "(min-width: 1024px) 50vw, 100vw"
+              }
             />
           </div>
           <div className="flex h-[280px] w-full items-center border-b border-t border-white bg-[#efefef] px-8 lg:h-[560px] lg:w-1/2 lg:px-20">
@@ -646,23 +985,62 @@ export default function ProjectDetailPageContent({
 
       <motion.section
         ref={fullBleedTwoRef}
-        className="relative h-[700px] overflow-hidden lg:h-[800px]"
-        style={{ opacity: prefersReducedMotion ? 1 : fullBleedTwoOpacity }}
+        className="relative min-h-[140svh] bg-[#171310]"
       >
-        <motion.div
-          className="absolute inset-0"
-          style={{ y: prefersReducedMotion ? 0 : fullBleedTwoImageY }}
-        >
-          {/* TODO: replace placeholder with final project imagery. */}
-          <Image
-            src={resolveProjectImageSrc(project.fullBleedImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0])}
-            alt={(project.fullBleedImages[1] ?? project.heroSlides[1] ?? project.heroSlides[0]).alt}
-            fill
-            quality={90}
-            className="object-cover"
-            sizes="100vw"
-          />
-        </motion.div>
+        <div className="sticky top-0 h-svh overflow-hidden">
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              opacity: prefersReducedMotion ? 1 : sectionSixFirstOpacity,
+              scale: prefersReducedMotion ? 1 : sectionSixFirstScale,
+            }}
+          >
+            {/* TODO: replace placeholder with final project imagery. */}
+            <Image
+              src={resolveProjectImageSrc(sectionSixImages[0])}
+              alt={sectionSixImages[0].alt}
+              fill
+              quality={90}
+              className={
+                isStElmoProject
+                  ? "object-cover object-center"
+                  : "object-cover object-center md:object-contain"
+              }
+              style={
+                isStElmoProject
+                  ? { objectFit: "cover", objectPosition: "center" }
+                  : undefined
+              }
+              sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
+            />
+          </motion.div>
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              opacity: prefersReducedMotion ? 1 : sectionSixSecondOpacity,
+              scale: prefersReducedMotion ? 1 : sectionSixSecondScale,
+            }}
+          >
+            {/* TODO: replace placeholder with final project imagery. */}
+            <Image
+              src={resolveProjectImageSrc(sectionSixImages[1])}
+              alt={sectionSixImages[1].alt}
+              fill
+              quality={90}
+              className={
+                isStElmoProject
+                  ? "object-cover object-center"
+                  : "object-cover object-center md:object-contain"
+              }
+              style={
+                isStElmoProject
+                  ? { objectFit: "cover", objectPosition: "center" }
+                  : undefined
+              }
+              sizes={isStElmoProject ? stElmoResponsiveSizes : "100vw"}
+            />
+          </motion.div>
+        </div>
       </motion.section>
 
       <motion.section
@@ -838,7 +1216,11 @@ export default function ProjectDetailPageContent({
                 />
 
                 <Link href={card.href} className="block" aria-label={card.title}>
-                  <div className="relative z-10 h-56 overflow-hidden sm:h-60">
+                  <div
+                    className={`relative z-10 overflow-hidden ${
+                      isStElmoProject ? "aspect-[4/3] h-auto" : "h-56 sm:h-60"
+                    }`}
+                  >
                     {/* TODO: replace placeholder with final project imagery. */}
                     <Image
                       src={resolveProjectImageSrc(card.thumbnail)}
@@ -846,7 +1228,11 @@ export default function ProjectDetailPageContent({
                       fill
                       quality={90}
                       className="object-cover transition duration-700 group-hover:scale-[1.05]"
-                      sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
+                      sizes={
+                        isStElmoProject
+                          ? stElmoResponsiveSizes
+                          : "(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
+                      }
                     />
                     <div
                       className="absolute inset-0 bg-linear-to-b from-black/8 via-black/12 to-black/36"
@@ -869,6 +1255,82 @@ export default function ProjectDetailPageContent({
           </div>
         </Container>
       </motion.section>
+
+      <AnimatePresence>
+        {isGalleryModalOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/84 p-4 backdrop-blur-sm sm:p-8"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0.01 : 0.28, ease: revealEase }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Project gallery image lightbox"
+            onClick={() => setIsGalleryModalOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setIsGalleryModalOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/35 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa] sm:right-8 sm:top-8"
+              aria-label="Close image"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+                <path d="M6.7 5.3 12 10.6l5.3-5.3 1.4 1.4-5.3 5.3 5.3 5.3-1.4 1.4-5.3-5.3-5.3 5.3-1.4-1.4 5.3-5.3-5.3-5.3z" fill="currentColor" />
+              </svg>
+            </button>
+
+            <div
+              className="relative w-full max-w-6xl overflow-hidden rounded-[18px] border border-white/20 bg-black"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="relative h-[56svh] min-h-[320px] sm:h-[68svh]">
+                <Image
+                  src={resolveProjectImageSrc(activeGalleryImage)}
+                  alt={activeGalleryImage.alt}
+                  fill
+                  className="object-contain object-center"
+                  style={
+                    isStElmoProject
+                      ? { objectFit: "contain", objectPosition: "center" }
+                      : undefined
+                  }
+                  sizes={isStElmoProject ? stElmoResponsiveSizes : "90vw"}
+                  priority
+                />
+                <p className="absolute bottom-5 left-5 text-[10px] uppercase tracking-[0.32em] text-white/70 sm:bottom-7 sm:left-7">
+                  Image {resolvedActiveGalleryIndex + 1} of {safeGalleryImages.length}
+                </p>
+              </div>
+
+              {safeGalleryImages.length > 1 ? (
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 sm:bottom-6 sm:right-6">
+                  <button
+                    type="button"
+                    onClick={previousGalleryImage}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/40 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa]"
+                    aria-label="Previous image"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                      <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z" fill="currentColor" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextGalleryImage}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/40 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa]"
+                    aria-label="Next image"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                      <path d="M8.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0z" fill="currentColor" />
+                    </svg>
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </article>
   );
 }
