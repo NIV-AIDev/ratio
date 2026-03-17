@@ -100,7 +100,7 @@ export default function Footer() {
           <div className="space-y-6">
             <Link href="/" aria-label="Home" className="inline-flex">
               <Image
-                src="/images/brand/y.png"
+                src="/images/brand/WHITE_LG-1.2.png"
                 alt="The Ratio"
                 width={314}
                 height={85}
@@ -108,11 +108,13 @@ export default function Footer() {
               />
             </Link>
             <p className="max-w-md text-sm leading-relaxed text-[#b2b2b2] sm:text-base">
-              Luxury interior design studio and property developer delivering globally across private residences and
-              super-prime addresses.
+              A bespoke construction company providing architecture, interior design, and property development services globally across private residences and super-prime addresses.
             </p>
             <p className="text-[11px] uppercase tracking-[0.28em] text-[#8e8f92]">
-              The Ratio, Unit 9 Shield Drive Brentford TW8 9EX
+              The Ratio,<br />
+              Unit 9, Shield Drive,<br />
+              Brentford,<br />
+              TW8 9EX
             </p>
 
             <div ref={mobileAccordionRef} className="relative md:hidden">

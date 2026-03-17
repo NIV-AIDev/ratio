@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Container from "@/components/ui/container";
 
 type JourneyCard = {
@@ -16,6 +17,10 @@ type ProcessStage = {
   label: string;
   title: string;
   body: string;
+};
+
+type InteriorGalleryResponse = {
+  images?: string[];
 };
 
 const journeyCards: JourneyCard[] = [
@@ -87,8 +92,94 @@ const primaryButtonClass =
 const secondaryButtonDarkClass =
   "inline-flex items-center justify-center rounded-full border border-white/50 px-6 py-3 text-[11px] uppercase tracking-[0.32em] text-white transition duration-300 hover:border-white";
 
+const interiorGalleryFallbackImages = [
+  "/images/placeholders/services/interior-design/Gal-ID/00.jpg",
+  "/images/placeholders/services/interior-design/Gal-ID/01.png",
+];
+
 export default function InteriorDesignPageContent() {
   const prefersReducedMotion = useReducedMotion() ?? false;
+  const [galleryImages, setGalleryImages] = useState<string[]>(interiorGalleryFallbackImages);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+
+  const safeGalleryImages = useMemo(
+    () => (galleryImages.length > 0 ? galleryImages : interiorGalleryFallbackImages),
+    [galleryImages],
+  );
+
+  const resolvedActiveGalleryIndex = activeGalleryIndex % safeGalleryImages.length;
+  const activeGalleryImage =
+    safeGalleryImages[resolvedActiveGalleryIndex] ?? safeGalleryImages[0];
+
+  const nextGalleryImage = () => {
+    setActiveGalleryIndex((current) => (current + 1) % safeGalleryImages.length);
+  };
+
+  const previousGalleryImage = () => {
+    setActiveGalleryIndex(
+      (current) => (current - 1 + safeGalleryImages.length) % safeGalleryImages.length,
+    );
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadGalleryImages = async () => {
+      try {
+        const response = await fetch("/api/interior-design-gallery", { cache: "no-store" });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as InteriorGalleryResponse;
+        const loadedImages =
+          payload?.images?.filter((imagePath) => typeof imagePath === "string" && imagePath.length > 0) ?? [];
+
+        if (isCancelled || loadedImages.length === 0) {
+          return;
+        }
+
+        setGalleryImages(loadedImages);
+      } catch {
+        // Keep fallback gallery images when image loading fails.
+      }
+    };
+
+    void loadGalleryImages();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion || safeGalleryImages.length < 2 || isGalleryModalOpen) {
+      return;
+    }
+
+    const galleryInterval = window.setInterval(() => {
+      setActiveGalleryIndex((current) => (current + 1) % safeGalleryImages.length);
+    }, 5200);
+
+    return () => window.clearInterval(galleryInterval);
+  }, [isGalleryModalOpen, prefersReducedMotion, safeGalleryImages.length]);
+
+  useEffect(() => {
+    if (!isGalleryModalOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsGalleryModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isGalleryModalOpen]);
 
   return (
     <>
@@ -203,6 +294,114 @@ export default function InteriorDesignPageContent() {
             >
               <source src="/videos/services/interior-design/hero.mp4" type="video/mp4" />
             </video>
+          </motion.div>
+        </Container>
+      </section>
+
+      <section className="bg-[#efefea] py-16 sm:py-20 lg:py-24">
+        <Container className="max-w-[1180px]">
+          <motion.div {...revealUp(prefersReducedMotion)} className="space-y-4 text-center">
+            <p className="text-[11px] uppercase tracking-[0.34em] text-[#8b7a63]">Interior gallery</p>
+            <h2 className="font-(--font-home-serif) text-3xl uppercase tracking-[0.09em] text-[#ab9468] sm:text-5xl">
+              Spatial storytelling
+            </h2>
+            <p className="mx-auto max-w-3xl text-base leading-relaxed text-[#5a544c] sm:text-lg">
+              Explore our interior design references from macro composition through crafted details.
+            </p>
+          </motion.div>
+
+          <motion.div {...revealUp(prefersReducedMotion, 0.06)} className="mt-10 space-y-5">
+            <button
+              type="button"
+              onClick={() => setIsGalleryModalOpen(true)}
+              className="group block w-full rounded-[20px] border border-[#d7d2ca] bg-[#f7f5f2] p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ab9468]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#efefea] sm:p-3"
+              aria-label={`Open image ${resolvedActiveGalleryIndex + 1} in fullscreen`}
+            >
+              <div className="relative h-[54svh] min-h-[340px] overflow-hidden rounded-[16px] bg-[#ebe6df] [perspective:1200px] [transform-style:preserve-3d] sm:h-[62svh] lg:h-[72svh]">
+                {safeGalleryImages.map((imagePath, index) => {
+                  const isActive = resolvedActiveGalleryIndex === index;
+                  return (
+                    <motion.div
+                      key={imagePath}
+                      className="absolute inset-0"
+                      initial={false}
+                      animate={
+                        isActive
+                          ? { opacity: 1, scale: 1.01, z: 0, filter: "blur(0px)" }
+                          : { opacity: 0, scale: 0.95, z: -72, filter: "blur(0.8px)" }
+                      }
+                      transition={{
+                        duration: prefersReducedMotion ? 0.01 : 1.06,
+                        ease: revealEase,
+                      }}
+                    >
+                      <Image
+                        src={imagePath}
+                        alt={`Interior design gallery image ${index + 1}`}
+                        fill
+                        quality={90}
+                        className="object-contain object-center"
+                        sizes="(min-width: 1024px) 92vw, 100vw"
+                        priority={index === 0}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </button>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[11px] uppercase tracking-[0.26em] text-[#8f8679]">
+                Gallery image {resolvedActiveGalleryIndex + 1} / {safeGalleryImages.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={previousGalleryImage}
+                  aria-label="Show previous gallery image"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#cdbd9f] text-[#8f7a58] transition-colors duration-300 hover:border-[#ab9468] hover:text-[#ab9468]"
+                >
+                  <span aria-hidden>←</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={nextGalleryImage}
+                  aria-label="Show next gallery image"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#cdbd9f] text-[#8f7a58] transition-colors duration-300 hover:border-[#ab9468] hover:text-[#ab9468]"
+                >
+                  <span aria-hidden>→</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {safeGalleryImages.map((imagePath, index) => {
+                const isActive = index === resolvedActiveGalleryIndex;
+                return (
+                  <button
+                    key={`${imagePath}-${index}`}
+                    type="button"
+                    onClick={() => setActiveGalleryIndex(index)}
+                    className={`relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border transition-all duration-300 sm:h-24 sm:w-[8.5rem] ${
+                      isActive
+                        ? "border-[#ab9468] ring-2 ring-[#ab9468]/35"
+                        : "border-[#d4cec4] hover:border-[#b9ab96]"
+                    }`}
+                    aria-label={`Select gallery image ${index + 1}`}
+                    aria-current={isActive}
+                  >
+                    <Image
+                      src={imagePath}
+                      alt={`Interior design thumbnail ${index + 1}`}
+                      fill
+                      quality={85}
+                      className="object-cover object-center"
+                      sizes="136px"
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </motion.div>
         </Container>
       </section>
@@ -386,6 +585,77 @@ export default function InteriorDesignPageContent() {
           </div>
         </Container>
       </section>
+
+      <AnimatePresence>
+        {isGalleryModalOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/84 p-4 backdrop-blur-sm sm:p-8"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0.01 : 0.28, ease: revealEase }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Interior design gallery image lightbox"
+            onClick={() => setIsGalleryModalOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setIsGalleryModalOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/35 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa] sm:right-8 sm:top-8"
+              aria-label="Close image"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+                <path d="M6.7 5.3 12 10.6l5.3-5.3 1.4 1.4-5.3 5.3 5.3 5.3-1.4 1.4-5.3-5.3-5.3 5.3-1.4-1.4 5.3-5.3-5.3-5.3z" fill="currentColor" />
+              </svg>
+            </button>
+
+            <div
+              className="relative w-full max-w-6xl overflow-hidden rounded-[18px] border border-white/20 bg-black"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="relative h-[56svh] min-h-[320px] sm:h-[68svh]">
+                <Image
+                  src={activeGalleryImage}
+                  alt={`Interior design gallery image ${resolvedActiveGalleryIndex + 1}`}
+                  fill
+                  className="object-contain object-center"
+                  sizes="90vw"
+                  priority
+                />
+                <p className="absolute bottom-5 left-5 text-[10px] uppercase tracking-[0.32em] text-white/70 sm:bottom-7 sm:left-7">
+                  Image {resolvedActiveGalleryIndex + 1} of {safeGalleryImages.length}
+                </p>
+              </div>
+
+              {safeGalleryImages.length > 1 ? (
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 sm:bottom-6 sm:right-6">
+                  <button
+                    type="button"
+                    onClick={previousGalleryImage}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/40 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa]"
+                    aria-label="Previous image"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                      <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z" fill="currentColor" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextGalleryImage}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/40 text-white transition-colors hover:border-[#d6c4aa] hover:text-[#d6c4aa]"
+                    aria-label="Next image"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                      <path d="M8.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0z" fill="currentColor" />
+                    </svg>
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

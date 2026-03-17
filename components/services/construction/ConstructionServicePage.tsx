@@ -21,6 +21,11 @@ type ProcessStep = {
   imageAlt: string;
 };
 
+type ProcessDetailImage = {
+  image: string;
+  imageAlt: string;
+};
+
 type JourneyCard = {
   title: string;
   body: string;
@@ -98,6 +103,31 @@ const processSteps: ProcessStep[] = [
     body: "At completion, both project and design teams run a full internal snagging review before client walk-through, ensuring every detail is resolved to the expected standard.",
     image: "/images/placeholders/services/construction/5.PNG",
     imageAlt: "Refined finish visual representing final checks and completion-stage review.",
+  },
+];
+
+const processDetailImages: ProcessDetailImage[] = [
+  {
+    image:
+      "/images/placeholders/services/construction/Photo%2022-01-2025%2C%2016%2040%2048.jpg",
+    imageAlt: "Steel beam installation across the existing floor void.",
+  },
+  {
+    image:
+      "/images/placeholders/services/construction/Photo%2022-01-2025%2C%2016%2040%2013.jpg",
+    imageAlt: "Reinforcement and ground floor preparation under temporary red lighting.",
+  },
+  {
+    image: "/images/placeholders/services/construction/DSC06372.jpg",
+    imageAlt: "Rear elevation site setup with construction materials staged.",
+  },
+  {
+    image: "/images/placeholders/services/construction/IMG_4803.jpeg",
+    imageAlt: "Steel frame and joist installation under temporary lighting.",
+  },
+  {
+    image: "/images/placeholders/services/construction/IMG_4750.jpeg",
+    imageAlt: "Site team working on structural floor and beam integration.",
   },
 ];
 
@@ -244,6 +274,10 @@ export default function ConstructionServicePage() {
     setActiveProcessSlide((current) => (current + 1) % processSteps.length);
   };
 
+  const activeProcessDetailImage =
+    processDetailImages[activeProcessSlide % processDetailImages.length] ??
+    processDetailImages[0];
+
   return (
     <article className="bg-[#f6f3ef] text-[#1a1a18]">
       <section className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden bg-[#0e0d0b] text-white">
@@ -268,7 +302,7 @@ export default function ConstructionServicePage() {
             preload="metadata"
             aria-label="Construction hero video"
           >
-            <source src="/videos/services/shared/hero-updated.m4v" type="video/mp4" />
+            <source src="/videos/services/cons/cons.m4v" type="video/mp4" />
           </video>
         </motion.div>
       </section>
@@ -432,7 +466,7 @@ export default function ConstructionServicePage() {
                 <video
                   ref={featureVideoRef}
                   // TODO: Replace with final licensed feature film.
-                  src="/videos/placeholders/construction/cons.mp4"
+                  src="/videos/placeholders/construction/con.mp4"
                   poster="/images/placeholders/construction/hero-poster.jpg"
                   className="h-full w-full object-cover"
                   autoPlay={!prefersReducedMotion}
@@ -649,7 +683,7 @@ export default function ConstructionServicePage() {
             <div className="relative hidden min-h-[280px] overflow-hidden rounded-[2px] bg-black shadow-[0_25px_50px_rgba(0,0,0,0.2)] xl:block">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={processSteps[activeProcessSlide]?.image}
+                  key={activeProcessDetailImage?.image}
                   initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, x: -24 }}
@@ -657,8 +691,8 @@ export default function ConstructionServicePage() {
                   className="absolute inset-0"
                 >
                   <Image
-                    src={processSteps[activeProcessSlide]?.image}
-                    alt={processSteps[activeProcessSlide]?.imageAlt}
+                    src={activeProcessDetailImage?.image}
+                    alt={activeProcessDetailImage?.imageAlt}
                     fill
                     className="object-cover"
                     sizes="22vw"

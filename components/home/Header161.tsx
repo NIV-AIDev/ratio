@@ -16,7 +16,7 @@ export default function Header161() {
     pathname === "/about" ||
     pathname === "/service" ||
     pathname === "/services" ||
-    pathname.startsWith("/projects") ||
+    pathname === "/projects" ||
     pathname.startsWith("/blog");
   const isLightTheme = isScrolled || forceLightTheme;
   const foregroundClass = isLightTheme ? "text-[#545960]" : "text-white";

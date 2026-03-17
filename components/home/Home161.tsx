@@ -8,6 +8,7 @@ import Container from "@/components/ui/container";
 import GlassReviewSlider from "@/components/reviews/GlassReviewSlider";
 import { buildMixedReviewSlides } from "@/components/reviews/reviewSlides";
 import { blogPosts, formatBlogDate } from "@/lib/blog/posts";
+import { getOrderedProjects, resolveProjectImageSrc } from "@/lib/projects/data";
 import { reviewCardData } from "@/lib/reviews";
 
 const services = [
@@ -72,7 +73,7 @@ const journeyCards = [
       "Explore our latest residences and development outcomes, delivered with architectural precision and refined detail.",
     href: "/projects",
     cta: "View Projects",
-    imageSrc: "/images/projects/the-bryant-project/the-bryant-project2.jpg",
+    imageSrc: "/images/projects/the-silverstone/01.jpg",
   },
   {
     title: "Showroom",
@@ -85,27 +86,12 @@ const journeyCards = [
 ];
 
 const latestProjects = [
-  {
-    title: "The Bryant Project",
-    description:
-      "A high-spec residential transformation balancing architectural structure with editorial interior detailing.",
-    href: "/projects/the-bryant-project",
-    imageSrc: "/images/projects/the-bryant-project/the-bryant-project11.jpg",
-  },
-  {
-    title: "The Durham Project",
-    description:
-      "A layered family residence with bespoke joinery, controlled natural light, and precision sequencing.",
-    href: "/projects/the-durham-project-1",
-    imageSrc: "/images/projects/the-durham-project-1/the-durham-project15.jpg",
-  },
-  {
-    title: "The Fulwell Project",
-    description:
-      "A contemporary residence calibrated for lifestyle-led planning, buildability, and highly tailored finishes.",
-    href: "/projects/the-fulwell-project",
-    imageSrc: "/images/projects/the-fulwell-project/Loft-conversion-london-the-ratio.jpg",
-  },
+  ...getOrderedProjects().slice(0, 3).map((project) => ({
+    title: project.title,
+    description: project.summary,
+    href: `/projects/${project.slug}`,
+    imageSrc: resolveProjectImageSrc(project.thumbnail),
+  })),
 ];
 
 const serviceCardAccents = [
@@ -184,7 +170,7 @@ export default function Home161() {
             preload="metadata"
             aria-label="The Ratio homepage hero video"
           >
-            <source src="/videos/services/shared/main.m4v" type="video/mp4" />
+            <source src="/videos/services/shared/New_main.m4v" type="video/mp4" />
           </video>
         </motion.div>
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,8,8,0.12),rgba(8,8,8,0.34))]" />

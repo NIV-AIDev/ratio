@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Container from "@/components/ui/container";
 
@@ -77,7 +77,7 @@ const serviceBlocks: ServiceBlock[] = [
       "Approval risk management and sequencing",
     ],
     // TODO: replace with licensed planning and approvals imagery.
-    imageSrc: "/images/placeholders/services/architecture/planning.png",
+    imageSrc: "/images/placeholders/services/architecture/02.png",
     imageAlt: "Planning submissions and approvals placeholder",
     tone: "dark",
   },
@@ -96,7 +96,7 @@ const serviceBlocks: ServiceBlock[] = [
       "Tender support and contractor alignment",
     ],
     // TODO: replace with licensed technical coordination imagery.
-    imageSrc: "/images/placeholders/services/architecture/technical.png",
+    imageSrc: "/images/placeholders/services/architecture/01.jpg",
     imageAlt: "Technical design and consultant coordination placeholder",
     tone: "light",
   },
@@ -159,7 +159,7 @@ const processSteps: ProcessStep[] = [
     label: "02",
     title: "Options & Direction",
     body: "Concept options are tested and refined into a preferred direction with balanced spatial performance, aesthetics, and planning viability.",
-    imageSrc: "/images/placeholders/services/architecture/Arch_hero.jpg",
+    imageSrc: "/images/placeholders/services/architecture/planned.jpg",
   },
   {
     label: "03",
@@ -208,21 +208,24 @@ export default function ArchitectureServicePage() {
   const heroCopyY = useTransform(heroProgress, [0, 1], [0, 34]);
   const heroCopyOpacity = useTransform(heroProgress, [0, 0.72], [1, 0.24]);
 
-  const goToProcessSlide = (index: number) => {
-    const slider = sliderRef.current;
-    if (!slider) {
-      return;
-    }
+  const goToProcessSlide = useCallback(
+    (index: number) => {
+      const slider = sliderRef.current;
+      if (!slider) {
+        return;
+      }
 
-    const target = slider.children.item(index) as HTMLElement | null;
-    if (!target) {
-      return;
-    }
+      const target = slider.children.item(index) as HTMLElement | null;
+      if (!target) {
+        return;
+      }
 
-    const left = target.offsetLeft - slider.offsetLeft;
-    slider.scrollTo({ left, behavior: prefersReducedMotion ? "auto" : "smooth" });
-    setActiveProcessIndex(index);
-  };
+      const left = target.offsetLeft - slider.offsetLeft;
+      slider.scrollTo({ left, behavior: prefersReducedMotion ? "auto" : "smooth" });
+      setActiveProcessIndex(index);
+    },
+    [prefersReducedMotion],
+  );
 
   useEffect(() => {
     const slider = sliderRef.current;
@@ -262,7 +265,7 @@ export default function ArchitectureServicePage() {
     }, 6800);
 
     return () => window.clearInterval(interval);
-  }, [activeProcessIndex, prefersReducedMotion]);
+  }, [activeProcessIndex, goToProcessSlide, prefersReducedMotion]);
 
   const currentProcess = useMemo(
     () => processSteps[activeProcessIndex] ?? processSteps[0],
@@ -363,6 +366,8 @@ export default function ArchitectureServicePage() {
 
       {serviceBlocks.map((block, index) => {
         const isDark = block.tone === "dark";
+        const useContainedImageFrame =
+          block.id === "planning-approvals" || block.id === "technical-coordination";
         return (
           <section
             key={block.id}
@@ -420,13 +425,25 @@ export default function ArchitectureServicePage() {
                 }
               >
                 <div className="relative min-h-[320px] sm:min-h-[400px]">
-                  <Image
-                    src={block.imageSrc}
-                    alt={block.imageAlt}
-                    fill
-                    className="object-cover transition duration-700 hover:scale-[1.03]"
-                    sizes="(min-width: 1024px) 45vw, 100vw"
-                  />
+                  {useContainedImageFrame ? (
+                    <div className="absolute top-[8%] h-[84%] w-full">
+                      <Image
+                        src={block.imageSrc}
+                        alt={block.imageAlt}
+                        fill
+                        className="object-contain transition duration-700"
+                        sizes="(min-width: 1024px) 45vw, 100vw"
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src={block.imageSrc}
+                      alt={block.imageAlt}
+                      fill
+                      className="object-cover transition duration-700 hover:scale-[1.03]"
+                      sizes="(min-width: 1024px) 45vw, 100vw"
+                    />
+                  )}
                   <div
                     className={
                       isDark

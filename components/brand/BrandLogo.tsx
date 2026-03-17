@@ -12,8 +12,8 @@ type BrandLogoProps = {
 };
 
 const LOGO_SOURCES = {
-  dark: "/images/brand/286.png",
-  light: "/images/brand/y.png",
+  dark: "/images/brand/BLACK_LG-1.png",
+  light: "/images/brand/WHITE_LG-1.2.png",
 };
 
 const LOGO_ASPECT_RATIOS = {

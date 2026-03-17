@@ -111,7 +111,7 @@ export default function PropertyDevelopmentContent() {
             preload="metadata"
             aria-label="Property development hero video"
           >
-                <source src="/videos/services/shared/hero-updated.m4v" type="video/mp4" />
+                <source src="/videos/services/shared/New_hero-updated.m4v" type="video/mp4" />
           </video>
         </motion.div>
       </section>
@@ -245,14 +245,18 @@ export default function PropertyDevelopmentContent() {
             className="overflow-hidden rounded-[28px] border border-[#e4dbd0] bg-white"
           >
             <div className="relative h-[280px] w-full sm:h-[340px]">
-              {/* TODO: Replace with licensed Unsplash/Pexels/Pixabay approach imagery. */}
-              <Image
-                src="/images/placeholders/services/property-development/sisu.png"
-                alt="Approach section placeholder"
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 34vw, 100vw"
-              />
+              <video
+                className="h-full w-full object-cover"
+                autoPlay={!Boolean(prefersReducedMotion)}
+                muted
+                loop
+                playsInline
+                controls={Boolean(prefersReducedMotion)}
+                preload="metadata"
+                aria-label="Approach section video"
+              >
+                <source src="/images/placeholders/services/property-development/pixpop.mp4" type="video/mp4" />
+              </video>
             </div>
             <div className="space-y-4 p-8">
               <p className="text-[11px] uppercase tracking-[0.32em] text-[#8e857a]">Core disciplines</p>

@@ -11,12 +11,24 @@ export const REQUIRED_PROJECT_IMAGE_FILES = [
 export const REQUIRED_PROJECT_VIDEO_DIRECTORY = "/public/videos/projects/<slug>/";
 
 export const PROJECT_SLUGS = [
-  "the-bryant-project",
   "the-durham-project-1",
   "the-croft-project",
   "the-fulwell-project",
   "the-pound-project-1",
   "the-rothchilds-project",
+  "the-silverstone",
+  "the-queens-gate-gardens",
+  "ansty-manor",
+  "the-sawley",
+  "central-park-hotel",
+  "ealing",
+  "heath",
+  "st-heliers",
+  "the-denton",
+  "st-elmo",
+  "the-charlie",
+  "the-claremont",
+  "the-beachmont",
 ] as const;
 
 export type ProjectSlug = (typeof PROJECT_SLUGS)[number];
@@ -37,6 +49,7 @@ export type ProjectEntry = {
   thumbnail: ProjectImage;
   splitImages: [ProjectImage, ProjectImage];
   fullBleedImages: [ProjectImage, ProjectImage];
+  galleryImages?: ProjectImage[];
   assets: {
     imageDirectory: string;
     videoDirectory: string;
@@ -86,6 +99,280 @@ const buildCroftImage = (
   placeholderSrc,
 });
 
+const projectPlaceholderImages = [
+  "/images/placeholders/projects/project-01.jpg",
+  "/images/placeholders/projects/project-02.jpg",
+  "/images/placeholders/projects/project-03.jpg",
+  "/images/placeholders/projects/project-04.jpg",
+  "/images/placeholders/projects/project-05.jpg",
+  "/images/placeholders/projects/project-06.jpg",
+] as const;
+
+const slugToTitleCase = (slug: string) =>
+  slug
+    .split("-")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+
+type GeneratedProjectEntryConfig = {
+  slug: ProjectSlug;
+  title?: string;
+  order: number;
+  location: string;
+  summary: string;
+  assets?: ProjectEntry["assets"];
+  imageBuilder?: (fileName: string, alt: string, placeholderSrc: string) => ProjectImage;
+  fileNames: string[];
+};
+
+const getFirstNumericToken = (fileName: string) => {
+  const numericMatch = fileName.match(/\d+/);
+
+  if (!numericMatch) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Number.parseInt(numericMatch[0], 10);
+};
+
+const compareImageFileNames = (left: string, right: string) => {
+  const leftNumericToken = getFirstNumericToken(left);
+  const rightNumericToken = getFirstNumericToken(right);
+
+  if (leftNumericToken !== rightNumericToken) {
+    return leftNumericToken - rightNumericToken;
+  }
+
+  return left.localeCompare(right, undefined, { numeric: true, sensitivity: "base" });
+};
+
+const buildGeneratedProjectEntry = ({
+  slug,
+  title: providedTitle,
+  order,
+  location,
+  summary,
+  assets: providedAssets,
+  imageBuilder: providedImageBuilder,
+  fileNames,
+}: GeneratedProjectEntryConfig): ProjectEntry => {
+  const title = providedTitle ?? slugToTitleCase(slug);
+  const imageBuilder =
+    providedImageBuilder ??
+    ((fileName: string, alt: string, placeholderSrc: string) =>
+      buildProjectImage(slug, fileName, alt, placeholderSrc));
+  const deduplicatedFileNames = Array.from(
+    new Set(fileNames.map((fileName) => fileName.trim()).filter(Boolean)),
+  );
+  const safeFileNames =
+    deduplicatedFileNames.length > 0 ? deduplicatedFileNames.sort(compareImageFileNames) : ["01.jpg"];
+
+  const galleryImages = safeFileNames.map((fileName, index) =>
+    imageBuilder(
+      fileName,
+      `${title} gallery image ${index + 1}`,
+      projectPlaceholderImages[index % projectPlaceholderImages.length],
+    ),
+  );
+  const getImage = (index: number) => galleryImages[index % galleryImages.length];
+
+  const buildGeneratedImage = (index: number, label: string) =>
+    ({
+      ...getImage(index),
+      alt: `${title} ${label}`,
+    }) satisfies ProjectImage;
+
+  return {
+    slug,
+    title,
+    order,
+    location,
+    summary,
+    assets: providedAssets ?? buildProjectAssets(slug),
+    galleryImages,
+    thumbnail: buildGeneratedImage(0, "thumbnail"),
+    heroSlides: [
+      buildGeneratedImage(0, "hero slide one"),
+      buildGeneratedImage(1, "hero slide two"),
+      buildGeneratedImage(2, "hero slide three"),
+    ],
+    splitImages: [
+      buildGeneratedImage(3, "split gallery image left"),
+      buildGeneratedImage(4, "split gallery image right"),
+    ],
+    fullBleedImages: [
+      buildGeneratedImage(5, "full bleed image one"),
+      buildGeneratedImage(6, "full bleed image two"),
+    ],
+  };
+};
+
+const generatedProjectEntries: ProjectEntry[] = [
+  buildGeneratedProjectEntry({
+    slug: "the-silverstone",
+    order: 3,
+    location: "London",
+    summary: "A contemporary residential scheme balancing architectural clarity, crafted interiors, and delivery precision.",
+    imageBuilder: (fileName, alt, placeholderSrc) =>
+      buildProjectImage(
+        "the-silverstone",
+        fileName === "02.jpg"
+          ? "021.jpg"
+          : fileName === "03.jpg"
+            ? "031.jpg"
+            : fileName === "04.jpg"
+              ? "041.jpg"
+              : fileName === "06.jpg"
+                ? "061.jpg"
+                : fileName,
+        alt,
+        placeholderSrc,
+      ),
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-queens-gate-gardens",
+    order: 4,
+    location: "London",
+    summary: "A high-spec refurbishment coordinated across architecture, interiors, and build sequencing for seamless execution.",
+    fileNames: [
+      "01.jpeg",
+      "02.jpeg",
+      "03.jpeg",
+      "04.jpg",
+      "05.jpg",
+      "06.png",
+      "07.jpg",
+      "08.png",
+      "09.jpg",
+      "10.jpg",
+      "011.png",
+      "012.jpg",
+      "013.png",
+      "014.jpg",
+      "015.jpg",
+      "016.png",
+      "017.jpg",
+      "018.jpg",
+      "19.jpg",
+      "020.jpg",
+      "021.jpg",
+      "022.jpg",
+      "023.jpg",
+      "024.jpg",
+    ],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "ansty-manor",
+    order: 5,
+    location: "London",
+    summary: "A heritage-led private residence project with refined planning, bespoke detailing, and controlled programme delivery.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpeg", "06.jpeg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-sawley",
+    order: 7,
+    location: "London",
+    summary: "A residential transformation focused on proportion, material layering, and coordinated construction leadership.",
+    fileNames: [
+      "01.JPG",
+      "02.jpg",
+      "03.JPG",
+      "04.jpg",
+      "05.JPG",
+      "06.jpg",
+      "07.jpg",
+      "08.PNG",
+      "09.PNG",
+      "010.PNG",
+      "011.PNG",
+      "013.PNG",
+      "014.PNG",
+      "015.PNG",
+      "017.jpg",
+      "018.jpg",
+      "019.jpg",
+    ],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "central-park-hotel",
+    order: 8,
+    location: "London",
+    summary: "A hotel-focused redesign combining guest experience planning, architectural discipline, and premium interior delivery.",
+    fileNames: [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg",
+      "central-park-hotel-exterior-126921b8.jpg",
+    ],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "ealing",
+    order: 19,
+    location: "London",
+    summary: "A design-and-build residential project with streamlined approvals, tailored spaces, and high-quality finishing.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "heath",
+    order: 10,
+    location: "London",
+    summary: "A private home project delivering modern planning logic with warm, enduring interior character.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "st-heliers",
+    order: 11,
+    location: "London",
+    summary: "A carefully sequenced residential commission integrating architecture, interiors, and construction oversight.",
+    assets: {
+      imageDirectory: "/public/images/projects/st-elmo/",
+      videoDirectory: "/public/videos/projects/st-heliers/",
+    },
+    imageBuilder: (fileName, alt, placeholderSrc) =>
+      buildProjectImage("st-elmo", fileName, alt, placeholderSrc),
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-denton",
+    order: 12,
+    location: "London",
+    summary: "A full-scope private residence programme shaped by bespoke detailing and coordinated delivery control.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg", "08.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "st-elmo",
+    order: 14,
+    location: "London",
+    summary: "A premium residential project balancing contemporary function with calm, refined spatial composition.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-charlie",
+    order: 15,
+    location: "London",
+    summary: "A one-stop architecture and interiors project delivered with rigorous detailing and buildability focus.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-claremont",
+    order: 16,
+    location: "London",
+    summary: "A high-end residential scheme developed through integrated design direction and construction management.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg", "Z62_3614.jpg"],
+  }),
+  buildGeneratedProjectEntry({
+    slug: "the-beachmont",
+    order: 17,
+    location: "London",
+    summary: "A compact but highly resolved project combining architectural intent, interior craft, and delivery certainty.",
+    fileNames: ["01.jpg", "02.jpg", "03.jpg"],
+  }),
+];
+
 export const resolveProjectImageSrc = (image: ProjectImage) => {
   if (useProjectPlaceholders && image.placeholderSrc) {
     return image.placeholderSrc;
@@ -95,93 +382,53 @@ export const resolveProjectImageSrc = (image: ProjectImage) => {
 };
 
 export const projectsData: ProjectEntry[] = [
-  {
-    slug: "the-bryant-project",
-    title: "The Bryant Project",
-    order: 1,
-    location: "London",
-    summary: "A high-spec residential transformation balancing architectural structure with editorial interior detailing.",
-    assets: buildProjectAssets("the-bryant-project"),
-    thumbnail: buildProjectImage(
-      "the-bryant-project",
-      "the-bryant-project2.jpg",
-      "The Bryant Project thumbnail",
-      "/images/placeholders/projects/project-01.jpg",
-    ),
-    heroSlides: [
-      buildProjectImage("the-bryant-project", "the-bryant-project2.jpg", "The Bryant Project hero slide one", "/images/placeholders/projects/project-01.jpg"),
-      buildProjectImage("the-bryant-project", "the-bryant-project3.jpg", "The Bryant Project hero slide two", "/images/placeholders/projects/project-02.jpg"),
-      buildProjectImage("the-bryant-project", "the-bryant-project4.jpg", "The Bryant Project hero slide three", "/images/placeholders/projects/project-03.jpg"),
-    ],
-    splitImages: [
-      buildProjectImage("the-bryant-project", "the-bryant-project1.jpg", "The Bryant Project split gallery image left", "/images/placeholders/projects/project-02.jpg"),
-      buildProjectImage("the-bryant-project", "the-bryant-project5.jpg", "The Bryant Project split gallery image right", "/images/placeholders/projects/project-03.jpg"),
-    ],
-    fullBleedImages: [
-      buildProjectImage("the-bryant-project", "the-bryant-project6.jpg", "The Bryant Project full bleed image one", "/images/placeholders/projects/project-04.jpg"),
-      buildProjectImage("the-bryant-project", "the-bryant-project2.jpg", "The Bryant Project full bleed image two", "/images/placeholders/projects/project-05.jpg"),
-    ],
-  },
-  {
+  buildGeneratedProjectEntry({
     slug: "the-durham-project-1",
     title: "The Durham Project",
-    order: 2,
+    order: 13,
     location: "London",
     summary: "A layered family residence with bespoke joinery, controlled natural light, and precision sequencing.",
-    assets: buildProjectAssets("the-durham-project-1"),
-    thumbnail: buildProjectImage(
-      "the-durham-project-1",
-      "the-durham-project15.jpg",
-      "The Durham Project thumbnail",
-      "/images/placeholders/projects/project-02.jpg",
-    ),
-    heroSlides: [
-      buildProjectImage("the-durham-project-1", "the-durham-project15.jpg", "The Durham Project hero slide one", "/images/placeholders/projects/project-02.jpg"),
-      buildProjectImage("the-durham-project-1", "the-durham-project18.jpg", "The Durham Project hero slide two", "/images/placeholders/projects/project-03.jpg"),
-      buildProjectImage("the-durham-project-1", "the-durham-project1.jpg", "The Durham Project hero slide three", "/images/placeholders/projects/project-04.jpg"),
+    fileNames: [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg",
+      "07.jpg",
+      "08.jpg",
+      "09.jpg",
     ],
-    splitImages: [
-      buildProjectImage("the-durham-project-1", "the-durham-project3.jpg", "The Durham Project split gallery image left", "/images/placeholders/projects/project-03.jpg"),
-      buildProjectImage("the-durham-project-1", "the-durham-project7.jpg", "The Durham Project split gallery image right", "/images/placeholders/projects/project-04.jpg"),
-    ],
-    fullBleedImages: [
-      buildProjectImage("the-durham-project-1", "the-durham-project20.jpg", "The Durham Project full bleed image one", "/images/placeholders/projects/project-05.jpg"),
-      buildProjectImage("the-durham-project-1", "the-durham-project11.jpg", "The Durham Project full bleed image two", "/images/placeholders/projects/project-06.jpg"),
-    ],
-  },
-  {
+  }),
+  buildGeneratedProjectEntry({
     slug: "the-croft-project",
-    title: "The Croft Project",
-    order: 3,
+    order: 6,
     location: "London",
     summary: "A tailored private residence balancing warm material layering, refined lighting, and contemporary spatial flow.",
     assets: {
       imageDirectory: "/public/images/projects/The Croft/",
       videoDirectory: "/public/videos/projects/the-croft-project/",
     },
-    thumbnail: buildCroftImage(
-      "Photo 12-10-2024, 15 44 16 (1).jpg",
-      "The Croft Project thumbnail",
-      "/images/placeholders/projects/project-03.jpg",
-    ),
-    heroSlides: [
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (11).jpg", "The Croft Project hero slide one", "/images/placeholders/projects/project-03.jpg"),
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (1).jpg", "The Croft Project hero slide two", "/images/placeholders/projects/project-04.jpg"),
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (2).jpg", "The Croft Project hero slide three", "/images/placeholders/projects/project-05.jpg"),
+    imageBuilder: buildCroftImage,
+    fileNames: [
+      "01.jpeg",
+      "02.jpeg",
+      "03.jpeg",
+      "04.jpeg",
+      "05.jpeg",
+      "07.jpeg",
+      "08.jpeg",
+      "09.jpeg",
+      "010.jpeg",
+      "011.jpeg",
+      "IMG_1074.jpeg",
+      "IMG_2359.jpeg",
     ],
-    splitImages: [
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (3).jpg", "The Croft Project split gallery image left", "/images/placeholders/projects/project-04.jpg"),
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (4).jpg", "The Croft Project split gallery image right", "/images/placeholders/projects/project-05.jpg"),
-    ],
-    fullBleedImages: [
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (8).jpg", "The Croft Project full bleed image one", "/images/placeholders/projects/project-06.jpg"),
-      buildCroftImage("Photo 12-10-2024, 15 44 16 (9).jpg", "The Croft Project full bleed image two", "/images/placeholders/projects/project-01.jpg"),
-    ],
-  },
+  }),
   {
     slug: "the-fulwell-project",
     title: "The Fulwell Project",
-    order: 4,
+    order: 18,
     location: "London",
     summary: "A contemporary residence calibrated for lifestyle-led planning, buildability, and highly tailored finishes.",
     assets: buildProjectAssets("the-fulwell-project"),
@@ -205,60 +452,54 @@ export const projectsData: ProjectEntry[] = [
       buildProjectImage("the-fulwell-project", "Untitled1.jpg", "The Fulwell Project full bleed image two", "/images/placeholders/projects/project-02.jpg"),
     ],
   },
-  {
+  buildGeneratedProjectEntry({
     slug: "the-pound-project-1",
-    title: "The Pound Project",
-    order: 5,
+    order: 1,
     location: "London",
     summary: "A meticulously coordinated project with restrained luxury detailing and programme-led execution.",
-    assets: buildProjectAssets("the-pound-project-1"),
-    thumbnail: buildProjectImage(
-      "the-pound-project-1",
-      "10.jpg",
-      "The Pound Project thumbnail",
-      "/images/placeholders/projects/project-05.jpg",
-    ),
-    heroSlides: [
-      buildProjectImage("the-pound-project-1", "14a.jpg", "The Pound Project hero slide one", "/images/placeholders/projects/project-05.jpg"),
-      buildProjectImage("the-pound-project-1", "12a.jpg", "The Pound Project hero slide two", "/images/placeholders/projects/project-06.jpg"),
-      buildProjectImage("the-pound-project-1", "9a.jpg", "The Pound Project hero slide three", "/images/placeholders/projects/project-01.jpg"),
+    title: "The Pound Project",
+    fileNames: [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg",
+      "07.jpg",
+      "08.jpg",
+      "09.jpg",
+      "010.jpg",
+      "011.jpg",
+      "012.jpg",
+      "013.jpg",
+      "6.jpg",
+      "6 (2).jpg",
     ],
-    splitImages: [
-      buildProjectImage("the-pound-project-1", "6.jpg", "The Pound Project split gallery image left", "/images/placeholders/projects/project-06.jpg"),
-      buildProjectImage("the-pound-project-1", "9.jpg", "The Pound Project split gallery image right", "/images/placeholders/projects/project-01.jpg"),
-    ],
-    fullBleedImages: [
-      buildProjectImage("the-pound-project-1", "8.jpg", "The Pound Project full bleed image one", "/images/placeholders/projects/project-02.jpg"),
-      buildProjectImage("the-pound-project-1", "10.jpg", "The Pound Project full bleed image two", "/images/placeholders/projects/project-03.jpg"),
-    ],
-  },
-  {
+  }),
+  buildGeneratedProjectEntry({
     slug: "the-rothchilds-project",
-    title: "The Rothchilds Project",
-    order: 6,
+    order: 9,
     location: "London",
     summary: "A landmark private commission bringing together architecture, interiors, and delivery into one cohesive statement.",
-    assets: buildProjectAssets("the-rothchilds-project"),
-    thumbnail: buildProjectImage(
-      "the-rothchilds-project",
+    title: "The Rothchilds Project",
+    fileNames: [
       "1.jpg",
-      "The Rothchilds Project thumbnail",
-      "/images/placeholders/projects/project-06.jpg",
-    ),
-    heroSlides: [
-      buildProjectImage("the-rothchilds-project", "1.jpg", "The Rothchilds Project hero slide one", "/images/placeholders/projects/project-06.jpg"),
-      buildProjectImage("the-rothchilds-project", "4.jpg", "The Rothchilds Project hero slide two", "/images/placeholders/projects/project-01.jpg"),
-      buildProjectImage("the-rothchilds-project", "8.jpg", "The Rothchilds Project hero slide three", "/images/placeholders/projects/project-02.jpg"),
+      "2.jpg",
+      "3.jpg",
+      "4.jpg",
+      "5.jpg",
+      "6.jpg",
+      "7.jpg",
+      "8.jpg",
+      "9.jpg",
+      "11.jpg",
+      "12.jpg",
+      "13.jpg",
+      "14.jpg",
+      "15.jpg",
     ],
-    splitImages: [
-      buildProjectImage("the-rothchilds-project", "3.jpg", "The Rothchilds Project split gallery image left", "/images/placeholders/projects/project-01.jpg"),
-      buildProjectImage("the-rothchilds-project", "2.jpg", "The Rothchilds Project split gallery image right", "/images/placeholders/projects/project-02.jpg"),
-    ],
-    fullBleedImages: [
-      buildProjectImage("the-rothchilds-project", "6.jpg", "The Rothchilds Project full bleed image one", "/images/placeholders/projects/project-03.jpg"),
-      buildProjectImage("the-rothchilds-project", "11.jpg", "The Rothchilds Project full bleed image two", "/images/placeholders/projects/project-04.jpg"),
-    ],
-  },
+  }),
+  ...generatedProjectEntries,
 ];
 
 export const getOrderedProjects = () =>

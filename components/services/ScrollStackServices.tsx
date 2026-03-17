@@ -87,7 +87,7 @@ export default function ScrollStackServices({ services }: ScrollStackServicesPro
       <div
         ref={containerRef}
         className="relative"
-        style={{ height: `${services.length * 100}vh` }}
+        style={{ height: `${services.length * 100}svh` }}
       >
         {services.map((service, index) => (
           <ServicePanelWithProgress

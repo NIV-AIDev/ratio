@@ -55,7 +55,7 @@ const policySections: PolicySection[] = [
     heading: "Access to your information and correction",
     paragraphs: [
       "You can request details of personal information we hold about you, and ask us to correct or remove inaccurate data.",
-      "To make a request, please contact us by email at Info@theratio.co.uk or write to us at Unit 9 Shield Drive Brentford TW8 9EX.",
+      "To make a request, please contact us by email at Info@theratio.co.uk or write to us at The Ratio, Unit 9, Shield Drive, Brentford, TW8 9EX.",
     ],
   },
   {

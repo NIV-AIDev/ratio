@@ -436,7 +436,12 @@ export default function ContactPageContent() {
           >
             <div>
               <p className="text-[11px] uppercase tracking-[0.3em] text-white/56">Main office</p>
-              <p className="mt-3 text-sm leading-relaxed text-white/84">Unit 9 Shield Drive Brentford TW8 9EX</p>
+              <p className="mt-3 text-sm leading-relaxed text-white/84">
+                The Ratio,<br />
+                Unit 9, Shield Drive,<br />
+                Brentford,<br />
+                TW8 9EX
+              </p>
               <a
                 href="https://maps.google.com/?q=Unit%209%20Shield%20Drive%20Brentford%20TW8%209EX"
                 target="_blank"

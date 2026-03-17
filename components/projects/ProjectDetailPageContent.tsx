@@ -40,6 +40,45 @@ const journeyCardAccents = [
   "from-[#d8d6e8]/50 via-[#bab0da]/30 to-transparent",
 ];
 
+const sectionFiveCopyBySlug: Partial<Record<ProjectEntry["slug"], string>> = {
+  "the-durham-project-1":
+    "The Durham Project concentrated on restoring period character while introducing contemporary joinery, clean services integration, and a more fluid room-to-room sequence.",
+  "the-croft-project":
+    "The Croft Project prioritised warm family living, with a reworked kitchen core, tailored storage, and soft material transitions that keep each space calm and connected.",
+  "the-fulwell-project":
+    "At The Fulwell Project, we unlocked loft volume through precise planning, light-balanced zoning, and custom millwork that made compact areas feel highly resolved.",
+  "the-pound-project-1":
+    "The Pound Project balanced listed-building constraints with contemporary interior detailing, preserving architectural integrity while sharpening daily functionality.",
+  "the-rothchilds-project":
+    "For The Rothchilds Project, the design direction focused on layered natural materials, gallery-like spatial framing, and finely controlled transitions between formal and informal rooms.",
+  "the-silverstone":
+    "The Silverstone Project was led by clean architectural lines, restrained palettes, and precision-built detailing to create a crisp, modern residential atmosphere.",
+  "the-queens-gate-gardens":
+    "The Queens Gate Gardens scheme delivered a high-spec refurbishment with heritage-sensitive upgrades, improving comfort and flow without losing period identity.",
+  "ansty-manor":
+    "At Ansty Manor, our approach protected historic fabric while introducing bespoke modern comfort, including tailored joinery and carefully balanced lighting layers.",
+  "the-sawley":
+    "The Sawley Project streamlined circulation and day-to-day functionality, pairing durable finishes with elegant detailing suited to long-term private living.",
+  "central-park-hotel":
+    "Central Park Hotel focused on guest experience, combining hospitality-led planning, robust specification choices, and coordinated construction sequencing across key spaces.",
+  ealing:
+    "The Ealing project optimised family-first layouts, introducing practical storage, improved natural flow, and durable finishes that still read as refined.",
+  heath:
+    "At Heath, the concept centred on understated architectural rhythm, warm tactile materials, and disciplined detailing that elevates everyday use.",
+  "st-heliers":
+    "St Heliers was delivered as a tightly sequenced architecture-and-interiors package, ensuring concept intent remained intact through final installation.",
+  "the-denton":
+    "The Denton project refined proportion, sightlines, and light quality to create calm spaces with a stronger sense of depth and visual continuity.",
+  "st-elmo":
+    "St Elmo was shaped as a statement residence, with curated finishes, bold spatial composition, and controlled contrasts that give each room a distinctive identity.",
+  "the-charlie":
+    "The Charlie project solved compact planning challenges through bespoke joinery, efficient detailing, and selective material contrast to maximise perceived space.",
+  "the-claremont":
+    "At The Claremont, we layered timeless finishes with contemporary detailing to deliver a residence that feels current while remaining durable for long-term use.",
+  "the-beachmont":
+    "The Beachmont project focused on generous social zones, crafted material pairings, and exacting build quality to support both entertaining and day-to-day comfort.",
+};
+
 const extractImageFileName = (src: string) => {
   const segments = src.split(/[/\\]/);
   return decodeURIComponent(segments[segments.length - 1] ?? src);
@@ -131,20 +170,19 @@ export default function ProjectDetailPageContent({
 }: ProjectDetailPageContentProps) {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [isDesktop, setIsDesktop] = useState(false);
-  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [activeDetailIndex, setActiveDetailIndex] = useState(0);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [shouldCenterGalleryThumbnails, setShouldCenterGalleryThumbnails] =
     useState(false);
   const [activeSuiteIndex, setActiveSuiteIndex] = useState(0);
+  const [galleryAspectRatios, setGalleryAspectRatios] = useState<Record<string, number>>({});
 
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const splitSectionRef = useRef<HTMLElement | null>(null);
   const fullBleedOneRef = useRef<HTMLElement | null>(null);
   const suiteSectionRef = useRef<HTMLElement | null>(null);
   const splitTwoSectionRef = useRef<HTMLElement | null>(null);
-  const fullBleedTwoRef = useRef<HTMLElement | null>(null);
   const heritageSectionRef = useRef<HTMLElement | null>(null);
   const journeyIntroSectionRef = useRef<HTMLElement | null>(null);
   const journeyCardsSectionRef = useRef<HTMLElement | null>(null);
@@ -158,6 +196,8 @@ export default function ProjectDetailPageContent({
     return () => mediaQuery.removeEventListener("change", sync);
   }, []);
 
+  const isPoundProject = project.slug === "the-pound-project-1";
+
   const galleryImages = useMemo(() => {
     const sourceImages =
       project.galleryImages && project.galleryImages.length > 0
@@ -168,10 +208,33 @@ export default function ProjectDetailPageContent({
             ...project.fullBleedImages,
           ];
 
-    return dedupeProjectImages(sourceImages).sort((left, right) =>
+    const dedupedGalleryImages = dedupeProjectImages(sourceImages).sort((left, right) =>
       compareImageSourcesByNumericOrder(left.src, right.src),
     );
-  }, [project.fullBleedImages, project.galleryImages, project.heroSlides, project.splitImages]);
+
+    if (!isPoundProject) {
+      return dedupedGalleryImages;
+    }
+
+    const existingSources = new Set(dedupedGalleryImages.map((image) => image.src));
+    const missingPreviousHeroImages = project.heroSlides
+      .slice(0, 3)
+      .filter((image) => !existingSources.has(image.src));
+
+    if (missingPreviousHeroImages.length === 0) {
+      return dedupedGalleryImages;
+    }
+
+    return [...dedupedGalleryImages, ...missingPreviousHeroImages].sort((left, right) =>
+      compareImageSourcesByNumericOrder(left.src, right.src),
+    );
+  }, [
+    isPoundProject,
+    project.fullBleedImages,
+    project.galleryImages,
+    project.heroSlides,
+    project.splitImages,
+  ]);
 
   const safeGalleryImages = useMemo(() => {
     if (galleryImages.length > 0) {
@@ -185,7 +248,7 @@ export default function ProjectDetailPageContent({
     () => safeGalleryImages.slice(0, Math.min(4, safeGalleryImages.length)),
     [safeGalleryImages],
   );
-  const heroCount = heroSlides.length;
+  const staticHeroImage = heroSlides[0] ?? safeGalleryImages[0];
 
   const detailMediaSlides = useMemo<[ProjectImage, ProjectImage]>(() => {
     const totalImages = safeGalleryImages.length;
@@ -195,6 +258,7 @@ export default function ProjectDetailPageContent({
       safeGalleryImages[2 % totalImages] ?? safeGalleryImages[0],
     ];
   }, [safeGalleryImages]);
+  const sectionTwoImage = detailMediaSlides[0] ?? safeGalleryImages[0];
 
   const splitTwoImage = useMemo(
     () => safeGalleryImages[3 % safeGalleryImages.length] ?? safeGalleryImages[0],
@@ -236,6 +300,13 @@ export default function ProjectDetailPageContent({
     [project.location, project.summary],
   );
 
+  const sectionFiveCopy = useMemo(() => {
+    return (
+      sectionFiveCopyBySlug[project.slug] ??
+      `${project.title} was delivered through an integrated design-and-build process in ${project.location}, aligning architecture, interiors, and construction sequencing from concept through completion.`
+    );
+  }, [project.location, project.slug, project.title]);
+
   const firstSuiteTitle =
     project.slug === "the-croft-project"
       ? "The Kitchen"
@@ -259,18 +330,18 @@ export default function ProjectDetailPageContent({
     [firstSuiteTitle, sectionFourImages],
   );
 
-  const resolvedActiveHeroIndex = activeHeroIndex % heroCount;
   const resolvedActiveGalleryIndex = activeGalleryIndex % safeGalleryImages.length;
   const resolvedActiveSuiteIndex = activeSuiteIndex % suiteSlides.length;
 
-  const activeHero = heroSlides[resolvedActiveHeroIndex] ?? heroSlides[0];
   const activeGalleryImage =
     safeGalleryImages[resolvedActiveGalleryIndex] ?? safeGalleryImages[0];
+  const activeGalleryAspectRatio = galleryAspectRatios[activeGalleryImage.src] ?? 16 / 10;
   const activeDetail = detailSlides[activeDetailIndex] ?? detailSlides[0];
-  const activeSuite = suiteSlides[resolvedActiveSuiteIndex] ?? suiteSlides[0];
   const revealDistance = isDesktop ? 20 : 12;
   const fadeUpInEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
   const isStElmoProject = project.slug === "st-elmo";
+  const shouldHideFourthAndSixthSections =
+    project.slug === "ansty-manor" || project.slug === "the-silverstone";
   const stElmoResponsiveSizes =
     "(max-width: 768px) 100vw, (max-width: 1024px) 90vw, (max-width: 1400px) 80vw, 70vw";
 
@@ -303,11 +374,6 @@ export default function ProjectDetailPageContent({
     offset: ["start 94%", "start 80%"],
   });
 
-  const { scrollYProgress: fullBleedTwoProgress } = useScroll({
-    target: fullBleedTwoRef,
-    offset: ["start end", "end start"],
-  });
-
   const { scrollYProgress: heritageProgress } = useScroll({
     target: heritageSectionRef,
     offset: ["start 96%", "start 82%"],
@@ -334,17 +400,10 @@ export default function ProjectDetailPageContent({
   const fullBleedOneY = useTransform(fullBleedOneProgress, [0, 1], [10, -10]);
 
   const suiteSectionOpacity = useTransform(suiteProgress, [0, 0.22], [0.985, 1]);
-  const suiteCopyOpacity = useTransform(suiteProgress, [0.12, 0.54], [0, 1]);
-  const suiteCopyY = useTransform(suiteProgress, [0.12, 0.54], [revealDistance, 0]);
 
   const splitTwoSectionOpacity = useTransform(splitTwoProgress, [0, 0.24], [0.99, 1]);
   const splitTwoCopyOpacity = useTransform(splitTwoProgress, [0.12, 0.56], [0, 1]);
   const splitTwoCopyY = useTransform(splitTwoProgress, [0.12, 0.56], [revealDistance, 0]);
-
-  const sectionSixFirstOpacity = useTransform(fullBleedTwoProgress, [0.1, 0.8], [1, 0]);
-  const sectionSixSecondOpacity = useTransform(fullBleedTwoProgress, [0.1, 0.8], [0, 1]);
-  const sectionSixFirstScale = useTransform(fullBleedTwoProgress, [0, 1], [1.01, 1.07]);
-  const sectionSixSecondScale = useTransform(fullBleedTwoProgress, [0, 1], [0.95, 1.03]);
 
   const heritageBlockOpacity = useTransform(heritageProgress, [0.08, 0.52], [0, 1]);
   const heritageBlockY = useTransform(heritageProgress, [0.08, 0.52], [revealDistance, 0]);
@@ -355,14 +414,6 @@ export default function ProjectDetailPageContent({
   const journeyCardsOpacity = useTransform(journeyCardsProgress, [0.08, 0.5], [1, 1]);
   const journeyCardsY = useTransform(journeyCardsProgress, [0.08, 0.5], [0, 0]);
 
-  const nextHero = () => {
-    setActiveHeroIndex((current) => (current + 1) % heroCount);
-  };
-
-  const previousHero = () => {
-    setActiveHeroIndex((current) => (current - 1 + heroCount) % heroCount);
-  };
-
   const nextGalleryImage = () => {
     setActiveGalleryIndex((current) => (current + 1) % safeGalleryImages.length);
   };
@@ -371,6 +422,30 @@ export default function ProjectDetailPageContent({
     setActiveGalleryIndex(
       (current) => (current - 1 + safeGalleryImages.length) % safeGalleryImages.length,
     );
+  };
+
+  const registerGalleryAspectRatio = (
+    imageSrc: string,
+    naturalWidth: number,
+    naturalHeight: number,
+  ) => {
+    if (naturalWidth <= 0 || naturalHeight <= 0) {
+      return;
+    }
+
+    const ratio = Math.round((naturalWidth / naturalHeight) * 1000) / 1000;
+
+    if (!Number.isFinite(ratio) || ratio <= 0) {
+      return;
+    }
+
+    setGalleryAspectRatios((current) => {
+      if (current[imageSrc] === ratio) {
+        return current;
+      }
+
+      return { ...current, [imageSrc]: ratio };
+    });
   };
 
   const nextSuite = () => {
@@ -463,62 +538,19 @@ export default function ProjectDetailPageContent({
         }
         style={isStElmoProject ? { aspectRatio: "16 / 9" } : undefined}
       >
-        <div
-          className="absolute inset-0 flex h-full w-full"
-          style={{
-            width: `${heroCount * 100}%`,
-            transform: `translateX(-${
-              resolvedActiveHeroIndex * (100 / heroCount)
-            }%)`,
-            transition: heroTransition,
-          }}
-        >
-          {heroSlides.map((slide, index) => (
-            <div
-              key={slide.src}
-              className="relative h-full shrink-0"
-              style={{ width: `${100 / heroCount}%` }}
-            >
-              {/* TODO: replace placeholder with final project imagery. */}
-              {isStElmoProject ? (
-                <>
-                  <Image
-                    src={resolveProjectImageSrc(slide)}
-                    alt=""
-                    fill
-                    aria-hidden
-                    quality={90}
-                    className="pointer-events-none object-cover object-center opacity-60"
-                    style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
-                    sizes={stElmoResponsiveSizes}
-                  />
-                  <Image
-                    src={resolveProjectImageSrc(slide)}
-                    alt={slide.alt}
-                    fill
-                    priority={index === 0}
-                    quality={90}
-                    className="object-contain object-center brightness-[1.05]"
-                    style={{ objectFit: "contain", objectPosition: "center" }}
-                    sizes={stElmoResponsiveSizes}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={resolveProjectImageSrc(slide)}
-                  alt={slide.alt}
-                  fill
-                  priority={index === 0}
-                  quality={90}
-                  className="object-cover object-center brightness-[1.05] md:object-contain"
-                  sizes="100vw"
-                />
-              )}
-            </div>
-          ))}
+        <div className="absolute inset-0 h-full w-full">
+          <Image
+            src={resolveProjectImageSrc(staticHeroImage)}
+            alt={staticHeroImage.alt}
+            fill
+            priority
+            quality={100}
+            className="object-cover object-center brightness-[1.05]"
+            sizes="100vw"
+          />
         </div>
 
-        <div className="absolute inset-0 bg-linear-to-b from-black/2 via-black/8 to-black/30" aria-hidden />
+      <div className="absolute inset-0 bg-linear-to-b from-black/2 via-black/8 to-black/30" aria-hidden />
 
         <Container className="relative z-10 flex h-full items-end pb-[calc(4rem+env(safe-area-inset-bottom))] pt-30 sm:pt-34 lg:pb-18">
           <motion.div
@@ -529,7 +561,7 @@ export default function ProjectDetailPageContent({
             className="max-w-[930px]"
           >
           <motion.div
-            key={activeHero.src}
+            key={`${project.slug}-hero-static`}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: prefersReducedMotion ? 0.01 : 0.65, ease: revealEase }}
@@ -543,7 +575,7 @@ export default function ProjectDetailPageContent({
                 delay: prefersReducedMotion ? 0 : 0.2,
                 ease: fadeUpInEase,
               }}
-              className="text-[12px] uppercase tracking-[0.18em] text-white/92 sm:text-[20px] sm:tracking-[0.1em]"
+              className="text-[12px] uppercase tracking-[0.18em] text-white/92 sm:text-[20px] sm:tracking-widest"
             >
               Luxury Interior Design for a Grade II Listed Home
             </motion.p>
@@ -572,49 +604,9 @@ export default function ProjectDetailPageContent({
                 Start a project
               </Link>
             </div>
-
-            <div className="flex items-center gap-2 pt-2" aria-label="Project hero slides">
-              {heroSlides.map((slide, index) => {
-                const isActive = resolvedActiveHeroIndex === index;
-                return (
-                  <button
-                    key={slide.src}
-                    type="button"
-                    onClick={() => setActiveHeroIndex(index)}
-                    aria-label={`Show slide ${index + 1}`}
-                    className="inline-flex h-8 w-8 items-center justify-center"
-                  >
-                    <span
-                      className={`h-3 w-3 rotate-45 border transition-colors duration-300 ${
-                        isActive
-                          ? "border-[#ab9468] bg-[#ab9468]/30"
-                          : "border-white/65 bg-transparent hover:border-white"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
           </motion.div>
           </motion.div>
         </Container>
-
-        <button
-          type="button"
-          onClick={previousHero}
-          aria-label="Show previous hero slide"
-          className="absolute left-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
-        >
-          <span aria-hidden>←</span>
-        </button>
-        <button
-          type="button"
-          onClick={nextHero}
-          aria-label="Show next hero slide"
-          className="absolute right-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
-        >
-          <span aria-hidden>→</span>
-        </button>
       </motion.section>
 
       <motion.section
@@ -622,68 +614,23 @@ export default function ProjectDetailPageContent({
         className="bg-[#ece8e1]"
         style={{ opacity: prefersReducedMotion ? 1 : splitSectionOpacity }}
       >
-        <div className="flex flex-col lg:min-h-[650px] lg:flex-row">
+        <div className="flex flex-col bg-[#efefef] lg:min-h-[650px] lg:flex-row">
           <div
             className={`relative h-[54svh] min-h-[380px] max-h-[560px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[650px] lg:w-1/2 ${
               isStElmoProject ? "bg-[#111]" : ""
             }`}
             style={isStElmoProject ? { aspectRatio: "3 / 2" } : undefined}
           >
-            <div
-              className="absolute inset-0 flex"
-              style={{
-                width: `${detailSlides.length * 100}%`,
-                transform: `translateX(-${activeDetailIndex * (100 / detailSlides.length)}%)`,
-                transition: heroTransition,
-              }}
-            >
-              {detailSlides.map((slide, index) => {
-                const media = detailMediaSlides[index] ?? detailMediaSlides[0];
-
-                return (
-                  <div
-                    key={slide.title}
-                    className="relative h-full shrink-0"
-                    style={{ width: `${100 / detailSlides.length}%` }}
-                  >
-                    {/* TODO: replace placeholder with final project imagery. */}
-                    {isStElmoProject ? (
-                      <>
-                        <Image
-                          src={resolveProjectImageSrc(media)}
-                          alt=""
-                          fill
-                          aria-hidden
-                          quality={90}
-                          className="pointer-events-none object-cover object-center opacity-60"
-                          style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
-                          sizes={stElmoResponsiveSizes}
-                        />
-                        <Image
-                          src={resolveProjectImageSrc(media)}
-                          alt={media.alt}
-                          fill
-                          quality={90}
-                          className="object-contain object-center brightness-[1.04]"
-                          style={{ objectFit: "contain", objectPosition: "center" }}
-                          sizes={stElmoResponsiveSizes}
-                        />
-                      </>
-                    ) : (
-                      <Image
-                        src={resolveProjectImageSrc(media)}
-                        alt={media.alt}
-                        fill
-                        quality={90}
-                        className="object-cover object-center brightness-[1.04]"
-                        sizes="(min-width: 1024px) 50vw, 100vw"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black/2" aria-hidden />
-                  </div>
-                );
-              })}
-            </div>
+            {/* TODO: replace placeholder with final project imagery. */}
+            <Image
+              src={resolveProjectImageSrc(sectionTwoImage)}
+              alt={sectionTwoImage.alt}
+              fill
+              quality={100}
+              className="object-cover object-center brightness-[1.04]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+            <div className="absolute inset-0 bg-black/2" aria-hidden />
           </div>
 
           <div className="relative w-full border-b border-white bg-[#efefef] px-8 py-12 lg:h-[650px] lg:w-1/2 lg:border-t lg:px-24 lg:py-20">
@@ -764,11 +711,13 @@ export default function ProjectDetailPageContent({
               <span className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(135deg,rgba(255,255,255,0.82)_0%,rgba(219,199,165,0.72)_22%,rgba(157,125,84,0.78)_52%,rgba(238,228,209,0.76)_100%)] opacity-92 transition-opacity duration-700 group-hover:opacity-100" />
               <span className="pointer-events-none absolute -inset-2 rounded-[28px] bg-[radial-gradient(circle_at_20%_12%,rgba(255,255,255,0.45),transparent_42%),radial-gradient(circle_at_78%_92%,rgba(172,141,98,0.24),transparent_56%)] opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
               <span className="relative block rounded-[22px] bg-[#f7f5f2]/95 p-2 shadow-[0_12px_26px_rgba(33,24,12,0.14),inset_0_1px_0_rgba(255,255,255,0.76)] transition-shadow duration-700 group-hover:shadow-[0_18px_34px_rgba(33,24,12,0.2),inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-3">
-                <div
-                  className={`relative h-[54svh] min-h-[340px] overflow-hidden rounded-[16px] [perspective:1200px] [transform-style:preserve-3d] sm:h-[62svh] lg:h-[72svh] ${
+                <motion.div
+                  layout
+                  className={`relative mx-auto w-full max-w-[1120px] overflow-hidden rounded-[16px] [perspective:1200px] [transform-style:preserve-3d] ${
                     isStElmoProject ? "bg-[#111]" : ""
                   }`}
-                  style={isStElmoProject ? { aspectRatio: "3 / 2" } : undefined}
+                  style={{ aspectRatio: activeGalleryAspectRatio }}
+                  transition={{ duration: prefersReducedMotion ? 0.01 : 0.65, ease: revealEase }}
                 >
                   {safeGalleryImages.map((image, index) => {
                     const isActive = resolvedActiveGalleryIndex === index;
@@ -779,8 +728,8 @@ export default function ProjectDetailPageContent({
                         initial={false}
                         animate={
                           isActive
-                            ? { opacity: 1, scale: 1.01, z: 0, filter: "blur(0px)" }
-                            : { opacity: 0, scale: 0.95, z: -72, filter: "blur(0.8px)" }
+                            ? { opacity: 1, z: 0 }
+                            : { opacity: 0, z: -72 }
                         }
                         transition={{
                           duration: prefersReducedMotion ? 0.01 : 1.06,
@@ -792,13 +741,15 @@ export default function ProjectDetailPageContent({
                           src={resolveProjectImageSrc(image)}
                           alt={image.alt}
                           fill
-                          quality={90}
-                          className="object-contain object-center"
-                          style={
-                            isStElmoProject
-                              ? { objectFit: "contain", objectPosition: "center" }
-                              : undefined
-                          }
+                          quality={100}
+                          className="object-cover object-center"
+                          onLoadingComplete={(loadedImage) => {
+                            registerGalleryAspectRatio(
+                              image.src,
+                              loadedImage.naturalWidth,
+                              loadedImage.naturalHeight,
+                            );
+                          }}
                           sizes={
                             isStElmoProject
                               ? stElmoResponsiveSizes
@@ -809,7 +760,7 @@ export default function ProjectDetailPageContent({
                       </motion.div>
                     );
                   })}
-                </div>
+                </motion.div>
               </span>
             </button>
 
@@ -874,112 +825,93 @@ export default function ProjectDetailPageContent({
         </Container>
       </motion.section>
 
-      <motion.section
-        ref={suiteSectionRef}
-        className={`relative h-svh min-h-[700px] overflow-hidden text-white sm:min-h-[760px] ${
-          isStElmoProject ? "bg-[#111]" : "bg-black"
-        }`}
-        style={{ opacity: prefersReducedMotion ? 1 : suiteSectionOpacity }}
-      >
-        <div
-          className="absolute inset-0 flex h-full w-full"
-          style={{
-            width: `${suiteSlides.length * 100}%`,
-            transform: `translateX(-${
-              resolvedActiveSuiteIndex * (100 / suiteSlides.length)
-            }%)`,
-            transition: heroTransition,
-          }}
+      {!shouldHideFourthAndSixthSections && (
+        <motion.section
+          ref={suiteSectionRef}
+          className={`relative h-svh min-h-[700px] overflow-hidden text-white sm:min-h-[760px] ${
+            isStElmoProject ? "bg-[#111]" : "bg-black"
+          }`}
+          style={{ opacity: prefersReducedMotion ? 1 : suiteSectionOpacity }}
         >
-          {suiteSlides.map((slide, index) => (
-            <div
-              key={`${slide.title}-${index}-${slide.image.src}`}
-              className="relative h-full shrink-0"
-              style={{ width: `${100 / suiteSlides.length}%` }}
-            >
-              {/* TODO: replace placeholder with final project imagery. */}
-              {isStElmoProject ? (
-                <>
-                  <Image
-                    src={resolveProjectImageSrc(slide.image)}
-                    alt=""
-                    fill
-                    aria-hidden
-                    quality={90}
-                    className="pointer-events-none object-cover object-center opacity-60"
-                    style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
-                    sizes={stElmoResponsiveSizes}
-                  />
+          <div
+            className="absolute inset-0 flex h-full w-full"
+            style={{
+              width: `${suiteSlides.length * 100}%`,
+              transform: `translateX(-${
+                resolvedActiveSuiteIndex * (100 / suiteSlides.length)
+              }%)`,
+              transition: heroTransition,
+            }}
+          >
+            {suiteSlides.map((slide, index) => (
+              <div
+                key={`${slide.title}-${index}-${slide.image.src}`}
+                className="relative h-full shrink-0"
+                style={{ width: `${100 / suiteSlides.length}%` }}
+              >
+                {/* TODO: replace placeholder with final project imagery. */}
+                {isStElmoProject ? (
+                  <>
+                    <Image
+                      src={resolveProjectImageSrc(slide.image)}
+                      alt=""
+                      fill
+                      aria-hidden
+                      quality={90}
+                      className="pointer-events-none object-cover object-center opacity-60"
+                      sizes={stElmoResponsiveSizes}
+                    />
+                    <Image
+                      src={resolveProjectImageSrc(slide.image)}
+                      alt={slide.image.alt}
+                      fill
+                      priority={index === 0}
+                      quality={90}
+                      className="object-contain object-center"
+                      style={{ objectFit: "contain", objectPosition: "center" }}
+                      sizes={stElmoResponsiveSizes}
+                    />
+                  </>
+                ) : (
                   <Image
                     src={resolveProjectImageSrc(slide.image)}
                     alt={slide.image.alt}
                     fill
                     priority={index === 0}
-                    quality={90}
-                    className="object-contain object-center"
-                    style={{ objectFit: "contain", objectPosition: "center" }}
-                    sizes={stElmoResponsiveSizes}
+                    quality={100}
+                    className="object-cover object-center"
+                    sizes="100vw"
                   />
-                </>
-              ) : (
-                <Image
-                  src={resolveProjectImageSrc(slide.image)}
-                  alt={slide.image.alt}
-                  fill
-                  priority={index === 0}
-                  quality={90}
-                  className="object-cover object-center md:object-contain"
-                  sizes="100vw"
-                />
-              )}
-            </div>
-          ))}
-        </div>
+                )}
+              </div>
+            ))}
+          </div>
 
-        <Container className="relative z-10 flex h-full items-end pb-[calc(4rem+env(safe-area-inset-bottom))] pt-28 sm:pt-32 lg:pb-18">
-          <motion.div
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0.01 : 0.32, ease: revealEase }}
-            className="space-y-4"
-            style={{
-              opacity: prefersReducedMotion ? 1 : suiteCopyOpacity,
-              y: prefersReducedMotion ? 0 : suiteCopyY,
-            }}
+          <button
+            type="button"
+            onClick={previousSuite}
+            aria-label="Show previous suite slide"
+            className="absolute left-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
           >
-            <h2 className="font-(--font-home-serif) text-[44px] uppercase tracking-[0.08em] sm:text-[52px] lg:text-[64px]">
-              {activeSuite.title}
-            </h2>
-            <p className="text-[14px] uppercase tracking-[0.18em] text-[#ab9468]">
-              {activeSuite.subtitle}
-            </p>
-          </motion.div>
-        </Container>
-
-        <button
-          type="button"
-          onClick={previousSuite}
-          aria-label="Show previous suite slide"
-          className="absolute left-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
-        >
-          <span aria-hidden>←</span>
-        </button>
-        <button
-          type="button"
-          onClick={nextSuite}
-          aria-label="Show next suite slide"
-          className="absolute right-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
-        >
-          <span aria-hidden>→</span>
-        </button>
-      </motion.section>
+            <span aria-hidden>←</span>
+          </button>
+          <button
+            type="button"
+            onClick={nextSuite}
+            aria-label="Show next suite slide"
+            className="absolute right-5 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/35 text-white/75 transition-colors hover:border-white hover:text-white lg:inline-flex"
+          >
+            <span aria-hidden>→</span>
+          </button>
+        </motion.section>
+      )}
 
       <motion.section
         ref={splitTwoSectionRef}
         className="bg-[#ece8e1]"
         style={{ opacity: prefersReducedMotion ? 1 : splitTwoSectionOpacity }}
       >
-        <div className="flex min-h-[560px] flex-col lg:flex-row">
+        <div className="flex min-h-[560px] flex-col bg-[#efefef] lg:flex-row">
           <div
             className={`relative h-[280px] w-full overflow-hidden border-b border-t border-r border-white lg:h-[560px] lg:w-1/2 ${
               isStElmoProject ? "bg-[#111]" : ""
@@ -1000,7 +932,6 @@ export default function ProjectDetailPageContent({
                   aria-hidden
                   quality={90}
                   className="pointer-events-none object-cover object-center opacity-60"
-                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
                   sizes={stElmoResponsiveSizes}
                 />
                 <Image
@@ -1018,8 +949,8 @@ export default function ProjectDetailPageContent({
                 src={resolveProjectImageSrc(splitTwoImage)}
                 alt={splitTwoImage.alt}
                 fill
-                quality={90}
-                className="object-cover object-center brightness-[1.04] md:object-contain"
+                quality={100}
+                className="object-cover object-center brightness-[1.04]"
                 sizes="(min-width: 1024px) 50vw, 100vw"
               />
             )}
@@ -1032,106 +963,28 @@ export default function ProjectDetailPageContent({
                 y: prefersReducedMotion ? 0 : splitTwoCopyY,
               }}
             >
-              From early concept through final detailing, the project was orchestrated as a single integrated journey,
-              with architecture and interiors calibrated to deliver long-term value and lived elegance.
+              {sectionFiveCopy}
             </motion.p>
           </div>
         </div>
       </motion.section>
 
-      <motion.section
-        ref={fullBleedTwoRef}
-        className="relative min-h-[140svh] bg-[#171310]"
-      >
-        <div
-          className={`sticky top-0 h-svh overflow-hidden ${
-            isStElmoProject ? "bg-[#111]" : ""
+      {!shouldHideFourthAndSixthSections && (
+        <section
+          className={`relative h-svh min-h-[700px] overflow-hidden ${
+            isStElmoProject ? "bg-[#111]" : "bg-[#171310]"
           }`}
         >
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              opacity: prefersReducedMotion ? 1 : sectionSixFirstOpacity,
-              scale: prefersReducedMotion ? 1 : sectionSixFirstScale,
-            }}
-          >
-            {/* TODO: replace placeholder with final project imagery. */}
-            {isStElmoProject ? (
-              <>
-                <Image
-                  src={resolveProjectImageSrc(sectionSixImages[0])}
-                  alt=""
-                  fill
-                  aria-hidden
-                  quality={90}
-                  className="pointer-events-none object-cover object-center opacity-60"
-                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
-                  sizes={stElmoResponsiveSizes}
-                />
-                <Image
-                  src={resolveProjectImageSrc(sectionSixImages[0])}
-                  alt={sectionSixImages[0].alt}
-                  fill
-                  quality={90}
-                  className="object-contain object-center"
-                  style={{ objectFit: "contain", objectPosition: "center" }}
-                  sizes={stElmoResponsiveSizes}
-                />
-              </>
-            ) : (
-              <Image
-                src={resolveProjectImageSrc(sectionSixImages[0])}
-                alt={sectionSixImages[0].alt}
-                fill
-                quality={90}
-                className="object-cover object-center md:object-contain"
-                sizes="100vw"
-              />
-            )}
-          </motion.div>
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              opacity: prefersReducedMotion ? 1 : sectionSixSecondOpacity,
-              scale: prefersReducedMotion ? 1 : sectionSixSecondScale,
-            }}
-          >
-            {/* TODO: replace placeholder with final project imagery. */}
-            {isStElmoProject ? (
-              <>
-                <Image
-                  src={resolveProjectImageSrc(sectionSixImages[1])}
-                  alt=""
-                  fill
-                  aria-hidden
-                  quality={90}
-                  className="pointer-events-none object-cover object-center opacity-60"
-                  style={{ filter: "blur(40px)", transform: "scale(1.2)" }}
-                  sizes={stElmoResponsiveSizes}
-                />
-                <Image
-                  src={resolveProjectImageSrc(sectionSixImages[1])}
-                  alt={sectionSixImages[1].alt}
-                  fill
-                  quality={90}
-                  className="object-contain object-center"
-                  style={{ objectFit: "contain", objectPosition: "center" }}
-                  sizes={stElmoResponsiveSizes}
-                />
-              </>
-            ) : (
-              <Image
-                src={resolveProjectImageSrc(sectionSixImages[1])}
-                alt={sectionSixImages[1].alt}
-                fill
-                quality={90}
-                className="object-cover object-center md:object-contain"
-                sizes="100vw"
-              />
-            )}
-          </motion.div>
-        </div>
-      </motion.section>
+          <Image
+            src={resolveProjectImageSrc(sectionSixImages[0])}
+            alt={sectionSixImages[0].alt}
+            fill
+            quality={100}
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+        </section>
+      )}
 
       <motion.section
         ref={heritageSectionRef}
