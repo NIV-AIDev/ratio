@@ -126,6 +126,8 @@ export default function Home161() {
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
+  const [showHeroVideo, setShowHeroVideo] = useState(false);
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
   const activeProject = latestProjects[activeProjectIndex];
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -147,6 +149,50 @@ export default function Home161() {
     return () => window.clearInterval(interval);
   }, [prefersReducedMotion]);
 
+  useEffect(() => {
+    let timeoutId: number | null = null;
+
+    const revealVideo = () => {
+      setShowHeroVideo(true);
+    };
+
+    if (prefersReducedMotion) {
+      revealVideo();
+      return;
+    }
+
+    const heroSection = heroRef.current;
+    if (!heroSection || typeof window.IntersectionObserver === "undefined") {
+      timeoutId = window.setTimeout(revealVideo, 120);
+      return () => {
+        if (timeoutId !== null) {
+          window.clearTimeout(timeoutId);
+        }
+      };
+    }
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+
+        revealVideo();
+        observer.disconnect();
+      },
+      { rootMargin: "220px 0px" },
+    );
+
+    observer.observe(heroSection);
+
+    return () => {
+      observer.disconnect();
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [prefersReducedMotion]);
+
   return (
     <>
       <section ref={heroRef} className="relative min-h-svh overflow-hidden bg-[#0d0d0d] text-white">
@@ -159,19 +205,30 @@ export default function Home161() {
             duration: prefersReducedMotion ? 0.01 : 0.3,
           }}
         >
-          <video
-            className="h-full w-full object-cover"
-            autoPlay={!Boolean(prefersReducedMotion)}
-            muted
-            loop
-            playsInline
-            controls={Boolean(prefersReducedMotion)}
-            poster=""
-            preload="metadata"
-            aria-label="The Ratio homepage hero video"
-          >
-            <source src="/videos/services/shared/New_main.m4v" type="video/mp4" />
-          </video>
+          <Image
+            src="/images/placeholders/services/architecture/Arch2.jpg"
+            alt="The Ratio homepage hero preview"
+            fill
+            priority
+            sizes="100vw"
+            className={`object-cover transition-opacity duration-500 ${heroVideoReady ? "opacity-0" : "opacity-100"}`}
+          />
+          {showHeroVideo ? (
+            <video
+              className="h-full w-full object-cover"
+              autoPlay={!Boolean(prefersReducedMotion)}
+              muted
+              loop
+              playsInline
+              controls={Boolean(prefersReducedMotion)}
+              poster="/images/placeholders/services/architecture/Arch2.jpg"
+              preload={prefersReducedMotion ? "metadata" : "none"}
+              aria-label="The Ratio homepage hero video"
+              onCanPlay={() => setHeroVideoReady(true)}
+            >
+              <source src="/videos/services/shared/New_main.m4v" type="video/mp4" />
+            </video>
+          ) : null}
         </motion.div>
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,8,8,0.12),rgba(8,8,8,0.34))]" />
 

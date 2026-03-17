@@ -23,10 +23,32 @@ export default function Header161() {
   const hoverClass = "group-hover:text-[#ab9468]";
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 24);
-    onScroll();
+    let rafId = 0;
+
+    const applyScrollState = () => {
+      const nextScrolled = window.scrollY > 24;
+      setIsScrolled((current) => (current === nextScrolled ? current : nextScrolled));
+    };
+
+    const onScroll = () => {
+      if (rafId !== 0) {
+        return;
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        applyScrollState();
+        rafId = 0;
+      });
+    };
+
+    applyScrollState();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== 0) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, []);
 
   useEffect(() => {
