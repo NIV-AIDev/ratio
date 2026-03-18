@@ -270,17 +270,26 @@ export default function ProjectDetailPageContent({
 
   const sectionFourImages = useMemo(() => {
     const lastIndex = safeGalleryImages.length - 1;
-    return selectUniqueProjectImages(safeGalleryImages, [
-      Math.min(1, lastIndex),
-      Math.min(3, lastIndex),
-      Math.min(2, lastIndex),
-      0,
-    ]);
-  }, [safeGalleryImages]);
+    const preferredSectionFourIndexes = isPoundProject
+      ? [
+          Math.min(8, lastIndex),
+          Math.min(10, lastIndex),
+          Math.min(1, lastIndex),
+          0,
+        ]
+      : [
+          Math.min(1, lastIndex),
+          Math.min(3, lastIndex),
+          Math.min(2, lastIndex),
+          0,
+        ];
+
+    return selectUniqueProjectImages(safeGalleryImages, preferredSectionFourIndexes);
+  }, [isPoundProject, safeGalleryImages]);
 
   const sectionSixImages = useMemo(() => {
     const lastIndex = safeGalleryImages.length - 1;
-    const sectionSixPrimaryIndex = isPoundProject ? Math.min(10, lastIndex) : Math.max(0, lastIndex - 1);
+    const sectionSixPrimaryIndex = isPoundProject ? lastIndex : Math.max(0, lastIndex - 1);
     return selectUniqueProjectImages(safeGalleryImages, [
       sectionSixPrimaryIndex,
       lastIndex,
@@ -339,8 +348,9 @@ export default function ProjectDetailPageContent({
 
   const activeGalleryImage =
     safeGalleryImages[resolvedActiveGalleryIndex] ?? safeGalleryImages[0];
-  const activeGalleryAspectRatio = galleryAspectRatios[activeGalleryImage.src] ?? 16 / 10;
-  const galleryFrameAspectRatio = isPoundProject ? 16 / 10 : activeGalleryAspectRatio;
+  const primaryGalleryImage = safeGalleryImages[0] ?? activeGalleryImage;
+  const primaryGalleryAspectRatio = galleryAspectRatios[primaryGalleryImage.src] ?? 16 / 10;
+  const galleryFrameAspectRatio = isPoundProject ? 16 / 10 : primaryGalleryAspectRatio;
   const activeDetail = detailSlides[activeDetailIndex] ?? detailSlides[0];
   const revealDistance = isDesktop ? 20 : 12;
   const fadeUpInEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
@@ -1302,7 +1312,7 @@ export default function ProjectDetailPageContent({
             </button>
 
             <div
-              className="relative w-full max-w-6xl overflow-hidden rounded-[18px] border border-white/20 bg-black"
+              className="relative w-full max-w-6xl overflow-hidden rounded-[18px] border border-white/20"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="relative h-[56svh] min-h-[320px] sm:h-[68svh]">
@@ -1310,12 +1320,7 @@ export default function ProjectDetailPageContent({
                   src={resolveProjectImageSrc(activeGalleryImage)}
                   alt={activeGalleryImage.alt}
                   fill
-                  className="object-contain object-center"
-                  style={
-                    isStElmoProject
-                      ? { objectFit: "contain", objectPosition: "center" }
-                      : undefined
-                  }
+                  className="object-cover object-center"
                   sizes={isStElmoProject ? stElmoResponsiveSizes : "90vw"}
                   priority
                 />
