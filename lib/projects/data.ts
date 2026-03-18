@@ -88,6 +88,7 @@ const buildProjectAssets = (slug: ProjectSlug) => ({
 });
 
 const croftImageDirectoryUrl = "/images/projects/The%20Croft";
+const stHeliersImageDirectoryUrl = "/images/projects/St%20Heliers";
 
 const buildCroftImage = (
   fileName: string,
@@ -95,6 +96,16 @@ const buildCroftImage = (
   placeholderSrc: string,
 ): ProjectImage => ({
   src: `${croftImageDirectoryUrl}/${encodeURIComponent(fileName)}`,
+  alt,
+  placeholderSrc,
+});
+
+const buildStHeliersImage = (
+  fileName: string,
+  alt: string,
+  placeholderSrc: string,
+): ProjectImage => ({
+  src: `${stHeliersImageDirectoryUrl}/${encodeURIComponent(fileName)}`,
   alt,
   placeholderSrc,
 });
@@ -329,12 +340,11 @@ const generatedProjectEntries: ProjectEntry[] = [
     location: "London",
     summary: "A carefully sequenced residential commission integrating architecture, interiors, and construction oversight.",
     assets: {
-      imageDirectory: "/public/images/projects/st-elmo/",
+      imageDirectory: "/public/images/projects/St Heliers/",
       videoDirectory: "/public/videos/projects/st-heliers/",
     },
-    imageBuilder: (fileName, alt, placeholderSrc) =>
-      buildProjectImage("st-elmo", fileName, alt, placeholderSrc),
-    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg"],
+    imageBuilder: buildStHeliersImage,
+    fileNames: ["01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg"],
   }),
   buildGeneratedProjectEntry({
     slug: "the-denton",
