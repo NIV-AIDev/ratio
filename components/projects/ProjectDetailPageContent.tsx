@@ -177,6 +177,9 @@ export default function ProjectDetailPageContent({
     useState(false);
   const [activeSuiteIndex, setActiveSuiteIndex] = useState(0);
   const [galleryAspectRatios, setGalleryAspectRatios] = useState<Record<string, number>>({});
+  const [hasHeroScrollRevealStarted, setHasHeroScrollRevealStarted] = useState(
+    () => typeof window !== "undefined" && window.scrollY > 8,
+  );
 
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const splitSectionRef = useRef<HTMLElement | null>(null);
@@ -277,12 +280,13 @@ export default function ProjectDetailPageContent({
 
   const sectionSixImages = useMemo(() => {
     const lastIndex = safeGalleryImages.length - 1;
+    const sectionSixPrimaryIndex = isPoundProject ? Math.min(10, lastIndex) : Math.max(0, lastIndex - 1);
     return selectUniqueProjectImages(safeGalleryImages, [
-      Math.max(0, lastIndex - 1),
+      sectionSixPrimaryIndex,
       lastIndex,
       0,
     ]);
-  }, [safeGalleryImages]);
+  }, [isPoundProject, safeGalleryImages]);
 
   const detailSlides = useMemo(
     () => [
@@ -336,6 +340,7 @@ export default function ProjectDetailPageContent({
   const activeGalleryImage =
     safeGalleryImages[resolvedActiveGalleryIndex] ?? safeGalleryImages[0];
   const activeGalleryAspectRatio = galleryAspectRatios[activeGalleryImage.src] ?? 16 / 10;
+  const galleryFrameAspectRatio = isPoundProject ? 16 / 10 : activeGalleryAspectRatio;
   const activeDetail = detailSlides[activeDetailIndex] ?? detailSlides[0];
   const revealDistance = isDesktop ? 20 : 12;
   const fadeUpInEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
@@ -527,6 +532,35 @@ export default function ProjectDetailPageContent({
       window.removeEventListener("resize", syncGalleryThumbnailAlignment);
   }, [safeGalleryImages.length]);
 
+  useEffect(() => {
+    const revealThreshold = 8;
+    if (window.scrollY > revealThreshold) return;
+
+    let rafId = 0;
+
+    const onScroll = () => {
+      if (rafId !== 0) {
+        return;
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        if (window.scrollY > revealThreshold) {
+          setHasHeroScrollRevealStarted(true);
+        }
+        rafId = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== 0) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
+
   return (
     <article className="overflow-x-clip bg-[#f6f3ef] text-[#1a1a18]">
       <motion.section
@@ -534,31 +568,59 @@ export default function ProjectDetailPageContent({
         className={
           isStElmoProject
             ? "relative min-h-[520px] w-full overflow-hidden bg-[#111] text-white sm:min-h-[600px] lg:min-h-[680px]"
-            : "relative h-svh min-h-[700px] overflow-hidden bg-black text-white sm:min-h-[760px]"
+            : "relative h-[74svh] min-h-[460px] overflow-hidden bg-black text-white sm:h-svh sm:min-h-[760px]"
         }
         style={isStElmoProject ? { aspectRatio: "16 / 9" } : undefined}
       >
-        <div className="absolute inset-0 h-full w-full">
+        <div
+          className={`absolute inset-0 h-full w-full ${
+            isPoundProject ? "object-cover" : ""
+          }`}
+          style={isPoundProject ? { objectFit: "cover" } : undefined}
+        >
           <Image
             src={resolveProjectImageSrc(staticHeroImage)}
             alt={staticHeroImage.alt}
             fill
             priority
             quality={100}
-            className="object-cover object-center brightness-[1.05]"
-            sizes="100vw"
+            className={
+              isPoundProject
+                ? "object-center brightness-[1.04]"
+                : "object-cover object-center brightness-[1.05]"
+            }
+            style={
+              isPoundProject
+                ? { objectFit: "inherit", objectPosition: "center 42%" }
+                : undefined
+            }
+            sizes="(max-width: 640px) 100vw, 100vw"
           />
         </div>
 
-      <div className="absolute inset-0 bg-linear-to-b from-black/2 via-black/8 to-black/30" aria-hidden />
+      <motion.div
+        className="absolute inset-0 bg-linear-to-b from-[#15120d]/0 via-[#18140f]/22 to-[#130f0b]/42"
+        initial={false}
+        animate={{ opacity: hasHeroScrollRevealStarted ? 1 : 0 }}
+        transition={{ duration: prefersReducedMotion ? 0.01 : 0.65, ease: revealEase }}
+        aria-hidden
+      />
 
         <Container className="relative z-10 flex h-full items-end pb-[calc(4rem+env(safe-area-inset-bottom))] pt-30 sm:pt-34 lg:pb-18">
           <motion.div
             style={{
-              opacity: prefersReducedMotion ? 1 : heroCopyOpacity,
-              y: prefersReducedMotion ? 0 : heroCopyY,
+              opacity: hasHeroScrollRevealStarted
+                ? prefersReducedMotion
+                  ? 1
+                  : heroCopyOpacity
+                : 0,
+              y: hasHeroScrollRevealStarted
+                ? prefersReducedMotion
+                  ? 0
+                  : heroCopyY
+                : 18,
             }}
-            className="max-w-[930px]"
+            className={`max-w-[930px] ${hasHeroScrollRevealStarted ? "" : "pointer-events-none select-none"}`}
           >
           <motion.div
             key={`${project.slug}-hero-static`}
@@ -716,7 +778,7 @@ export default function ProjectDetailPageContent({
                   className={`relative mx-auto w-full max-w-[1120px] overflow-hidden rounded-[16px] [perspective:1200px] [transform-style:preserve-3d] ${
                     isStElmoProject ? "bg-[#111]" : ""
                   }`}
-                  style={{ aspectRatio: activeGalleryAspectRatio }}
+                  style={{ aspectRatio: galleryFrameAspectRatio }}
                   transition={{ duration: prefersReducedMotion ? 0.01 : 0.65, ease: revealEase }}
                 >
                   {safeGalleryImages.map((image, index) => {
@@ -725,6 +787,7 @@ export default function ProjectDetailPageContent({
                       <motion.div
                         key={image.src}
                         className="absolute inset-0"
+                        style={isPoundProject ? { objectFit: "cover" } : undefined}
                         initial={false}
                         animate={
                           isActive
@@ -742,7 +805,12 @@ export default function ProjectDetailPageContent({
                           alt={image.alt}
                           fill
                           quality={100}
-                          className="object-cover object-center"
+                          className={isPoundProject ? "object-center" : "object-cover object-center"}
+                          style={
+                            isPoundProject
+                              ? { objectFit: "inherit", objectPosition: "center 46%" }
+                              : undefined
+                          }
                           onLoadingComplete={(loadedImage) => {
                             registerGalleryAspectRatio(
                               image.src,
@@ -828,7 +896,7 @@ export default function ProjectDetailPageContent({
       {!shouldHideFourthAndSixthSections && (
         <motion.section
           ref={suiteSectionRef}
-          className={`relative h-svh min-h-[700px] overflow-hidden text-white sm:min-h-[760px] ${
+          className={`relative h-[74svh] min-h-[460px] overflow-hidden text-white sm:h-svh sm:min-h-[760px] ${
             isStElmoProject ? "bg-[#111]" : "bg-black"
           }`}
           style={{ opacity: prefersReducedMotion ? 1 : suiteSectionOpacity }}
@@ -880,6 +948,11 @@ export default function ProjectDetailPageContent({
                     priority={index === 0}
                     quality={100}
                     className="object-cover object-center"
+                    style={
+                      isPoundProject
+                        ? { objectPosition: "center 45%" }
+                        : undefined
+                    }
                     sizes="100vw"
                   />
                 )}
@@ -971,7 +1044,7 @@ export default function ProjectDetailPageContent({
 
       {!shouldHideFourthAndSixthSections && (
         <section
-          className={`relative h-svh min-h-[700px] overflow-hidden ${
+          className={`relative h-[74svh] min-h-[460px] overflow-hidden sm:h-svh sm:min-h-[700px] ${
             isStElmoProject ? "bg-[#111]" : "bg-[#171310]"
           }`}
         >
@@ -981,6 +1054,11 @@ export default function ProjectDetailPageContent({
             fill
             quality={100}
             className="object-cover object-center"
+            style={
+              isPoundProject
+                ? { objectPosition: "center 44%" }
+                : undefined
+            }
             sizes="100vw"
           />
         </section>

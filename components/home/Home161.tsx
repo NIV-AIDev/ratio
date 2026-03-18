@@ -127,7 +127,6 @@ export default function Home161() {
   const heroRef = useRef<HTMLElement>(null);
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
   const [showHeroVideo, setShowHeroVideo] = useState(false);
-  const [heroVideoReady, setHeroVideoReady] = useState(false);
   const activeProject = latestProjects[activeProjectIndex];
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -205,14 +204,6 @@ export default function Home161() {
             duration: prefersReducedMotion ? 0.01 : 0.3,
           }}
         >
-          <Image
-            src="/images/placeholders/services/architecture/Arch2.jpg"
-            alt="The Ratio homepage hero preview"
-            fill
-            priority
-            sizes="100vw"
-            className={`object-cover transition-opacity duration-500 ${heroVideoReady ? "opacity-0" : "opacity-100"}`}
-          />
           {showHeroVideo ? (
             <video
               className="h-full w-full object-cover"
@@ -221,10 +212,8 @@ export default function Home161() {
               loop
               playsInline
               controls={Boolean(prefersReducedMotion)}
-              poster="/images/placeholders/services/architecture/Arch2.jpg"
               preload={prefersReducedMotion ? "metadata" : "none"}
               aria-label="The Ratio homepage hero video"
-              onCanPlay={() => setHeroVideoReady(true)}
             >
               <source src="/videos/services/shared/New_main.m4v" type="video/mp4" />
             </video>
